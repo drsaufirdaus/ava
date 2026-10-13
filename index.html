@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>AVA: Pahlawan Membaca (Gesture Clench Arcade)</title>
 
-<!-- Favicon & Touch Icon menggunakan gambar AVA -->
-<link rel="icon" type="image/png" href="https://i.imgur.com/PL6WHAc.png">
-<link rel="apple-touch-icon" href="https://i.imgur.com/PL6WHAc.png">
+<!-- Favicon & Touch Icon -->
+<link rel="icon" type="image/png" href="https://i.imgur.com/Lsnjybg.png">
+<link rel="apple-touch-icon" href="https://i.imgur.com/Lsnjybg.png">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -153,7 +153,7 @@ html,body{
   box-shadow:0 8px 0 #000, 0 0 25px rgba(251, 208, 0, 0.9);
 }
 
-/* Animasi Raksasa Ditumbuk (Knocked Out) */
+/* Animasi Raksasa Ditumbuk */
 .monster-card.knocked{
   animation:monsterKO 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
 }
@@ -163,7 +163,7 @@ html,body{
   100%{transform:translate(-50%, 40vh) scale(0.2) rotate(180deg);opacity:0}
 }
 
-/* Kesan Letupan Tumbukan (POW / BOOM) */
+/* Kesan Letupan Tumbukan */
 .hit-effect{
   position:fixed;
   transform:translate(-50%,-50%);
@@ -284,28 +284,31 @@ html,body{
 }
 #res-screen{display:none;justify-content:center}
 
-/* Header Avatar AVA & Nama Permainan */
+/* Header Avatar AVA & Nama Permainan (Tiada Border Circle) */
 .header-brand{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:14px;
+  gap:16px;
   margin-top:6px;
   flex-wrap:wrap;
 }
-.ava-avatar{
-  width:clamp(85px, 22vw, 125px);
-  aspect-ratio:1;
-  object-fit:cover;
-  border-radius:50%;
-  border:5px solid #000;
-  background:#fff;
-  box-shadow:0 8px 0 #000, 0 12px 20px rgba(0,0,0,0.3);
-  animation:logoBounce 2.2s ease-in-out infinite;
+
+.ava-logo-natural{
+  width:clamp(100px, 26vw, 150px);
+  height:auto;
+  max-height:190px;
+  object-fit:contain;
+  border-radius:0 !important;
+  border:none !important;
+  box-shadow:none !important;
+  background:transparent !important;
+  filter:drop-shadow(0 8px 12px rgba(0,0,0,0.35));
+  animation:avaFloat 2.6s ease-in-out infinite;
 }
-@keyframes logoBounce{
-  0%,100%{transform:translateY(0) scale(1)}
-  50%{transform:translateY(-8px) scale(1.04)}
+@keyframes avaFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
 }
 
 .brand-text{
@@ -441,7 +444,7 @@ html,body{
 <!-- SKRIN MENU UTAMA (HOMEPAGE) -->
 <div id="menu-screen">
   <div class="header-brand">
-    <img src="https://i.imgur.com/PL6WHAc.png" class="ava-avatar" alt="AVA Guru Cilik">
+    <img src="https://i.imgur.com/Lsnjybg.png" class="ava-logo-natural" alt="AVA Guru Cilik">
     <div class="brand-text">
       <h1 class="f stroke-mario" style="color:#fbd000;font-size:clamp(36px, 10vw, 70px);line-height:1">AVA</h1>
       <h2 class="f stroke-mario" style="color:#fff;font-size:clamp(20px, 5.5vw, 36px);line-height:1.1">JOM BACA!</h2>
@@ -478,8 +481,8 @@ html,body{
 
 <!-- SKRIN TAMAT PERMAINAN (RESULT) -->
 <div id="res-screen">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-    <img src="https://i.imgur.com/PL6WHAc.png" style="width:70px;height:70px;border-radius:50%;border:4px solid #000;box-shadow:0 4px 0 #000;" alt="AVA">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+    <img src="https://i.imgur.com/Lsnjybg.png" style="width:75px;height:auto;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));" alt="AVA">
     <h1 id="res-title" class="f stroke-mario" style="color:#fbd000;font-size:clamp(36px, 10vw, 70px);margin:0">TAHNIAH!</h1>
   </div>
   <div id="res-stars" style="font-size:clamp(50px, 15vw, 75px);margin:6px 0">⭐⭐⭐</div>
@@ -658,7 +661,6 @@ function renderWebcamMirror() {
     ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    // Lapisan penapis gelap ceria supaya raksasa & perkataan mudah dibaca
     ctx.fillStyle = "rgba(10, 25, 47, 0.38)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   } else {
@@ -685,10 +687,10 @@ function isFistClenched(landmarks) {
   const palmScale = getDistance3D(mcpMiddle, wrist) || 0.15;
 
   const fingers = [
-    { mcp: 5, tip: 8 },   // Telunjuk
-    { mcp: 9, tip: 12 },  // Hantu
-    { mcp: 13, tip: 16 }, // Manis
-    { mcp: 17, tip: 20 }  // Kelingking
+    { mcp: 5, tip: 8 },
+    { mcp: 9, tip: 12 },
+    { mcp: 13, tip: 16 },
+    { mcp: 17, tip: 20 }
   ];
 
   let curledCount = 0;
@@ -706,7 +708,7 @@ function isFistClenched(landmarks) {
   return (curledCount >= 3);
 }
 
-// MINTA KEBENARAN KAMERA SECARA AUTOMATIK SEBAIK SAHAJA WEB DIBUKA
+// MINTA KEBENARAN KAMERA SECARA AUTOMATIK
 async function autoInitWebcam() {
   const statusDot = document.getElementById("cam-status-dot");
   const statusText = document.getElementById("cam-status-text");
@@ -770,7 +772,6 @@ function onHandResults(results) {
   const gloveRing = document.getElementById("glove-icon");
   const gloveStatus = document.getElementById("glove-status");
 
-  // Jika masih di menu utama, jangan paparkan kursor sasaran
   if (document.getElementById("menu-screen").style.display !== "none") {
     cursorEl.style.display = "none";
     return;
@@ -794,7 +795,6 @@ function onHandResults(results) {
 
   const isConfirmedFist = gameState.fistHoldFrames >= 2;
 
-  // Koordinat cermin terbalik (selfie-view)
   const screenX = (1 - landmarks[9].x) * window.innerWidth;
   const screenY = landmarks[9].y * window.innerHeight;
 
@@ -938,7 +938,6 @@ function startGameDirectly() {
     localStorage.ava_player = pInput;
   }
 
-  // Jika kamera belum sempat dibuka, cuba aktifkan sekali lagi
   if (!gameState.isCameraActive) {
     autoInitWebcam();
   }
@@ -1098,7 +1097,7 @@ function backToMenu() {
 document.getElementById("player-input").value = gameState.playerName;
 buildCategoryMenu();
 
-// Minta kebenaran kamera serta-merta semasa laman dimuatkan
+// Minta kebenaran kamera secara automatik serta-merta
 window.addEventListener("DOMContentLoaded", () => {
   autoInitWebcam();
 });
