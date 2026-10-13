@@ -11,13 +11,15 @@
 <link rel="icon" type="image/png" href="https://i.imgur.com/PL6WHAc.png">
 <link rel="apple-touch-icon" href="https://i.imgur.com/PL6WHAc.png">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 
-<!-- Three.js CDN -->
+<!-- Three.js (r128) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- MediaPipe Hands & Camera Utils CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<!-- MediaPipe Hands CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
 
 <style>
@@ -46,7 +48,7 @@ canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
   gap:8px;
   padding:8px 10px;
   pointer-events:none;
-  z-index:4;
+  z-index:10;
 }
 #bar{display:flex;gap:6px;align-items:center;pointer-events:auto;flex-wrap:wrap;justify-content:center}
 .pill{
@@ -100,11 +102,10 @@ canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
   border-color:#e74c3c;
   box-shadow:0 6px 0 #c0392b55;
 }
-#qe{font-size:clamp(40px, 13vw, 80px);line-height:1.05}
+#qe{font-size:clamp(38px, 12vw, 76px);line-height:1.05}
 #qt{font-family:'Lilita One';font-size:clamp(18px, 5.2vw, 28px);color:#2e86de}
 #q.boss-box #qt{color:#c0392b}
 
-/* Boss Health Bar Container */
 #boss-bar-wrap{
   display:none;
   width:min(90vw, 320px);
@@ -135,7 +136,7 @@ canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   text-align:center;
-  z-index:6;
+  z-index:20;
 }
 #res{display:none;justify-content:center}
 
@@ -189,37 +190,77 @@ h1{
 }
 @keyframes fl{50%{transform:translateY(-8px) rotate(6deg)}}
 
+/* Gesture Reticle (Super Saufi style) */
 #cur{
   position:fixed;
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  border:4px solid #ff6b6b;
-  background:#ffffffd0;
+  transform:translate(-50%,-50%);
   pointer-events:none;
   display:none;
-  transform:translate(-50%,-50%);
-  z-index:99;
-  font-size:22px;
-  line-height:36px;
-  text-align:center;
+  z-index:90;
+  transition:transform 0.08s ease-out;
 }
+.glove-ring{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  border:3px solid #2ed573;
+  background:rgba(46, 213, 115, 0.25);
+  box-shadow:0 0 20px rgba(46, 213, 115, 0.6);
+  backdrop-filter:blur(2px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  transition:all 0.15s ease-out;
+}
+.glove-ring.clench{
+  border-color:#ff4757;
+  background:rgba(255, 71, 87, 0.55);
+  box-shadow:0 0 35px rgba(255, 71, 87, 0.9);
+  transform:scale(1.2);
+}
+.glove-label{
+  position:absolute;
+  bottom:-22px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#1e293be6;
+  border:1px solid #ffffff66;
+  color:#fff;
+  font-size:10px;
+  font-weight:900;
+  padding:2px 8px;
+  border-radius:10px;
+  white-space:nowrap;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
 #toast{
   position:fixed;
   left:50%;
-  bottom:10%;
+  bottom:12%;
   transform:translateX(-50%);
   font-family:'Lilita One';
-  font-size:clamp(24px, 7vw, 46px);
+  font-size:clamp(24px, 7vw, 44px);
   color:#fff;
   text-shadow:0 3px 0 #e67e22;
   pointer-events:none;
   opacity:0;
   transition:opacity .2s;
-  z-index:10;
+  z-index:70;
   white-space:nowrap;
 }
-video#v{display:none}
+video#v{
+  position:fixed;
+  top:0;
+  left:0;
+  width:1px;
+  height:1px;
+  opacity:0.01;
+  pointer-events:none;
+  z-index:-1;
+}
 
 .avimg{
   aspect-ratio:1;
@@ -237,7 +278,7 @@ video#v{display:none}
   bottom:calc(10px + env(safe-area-inset-bottom, 0px));
   width:clamp(65px, 16vw, 105px);
   display:none;
-  z-index:5;
+  z-index:15;
   pointer-events:none;
 }
 #bub{
@@ -266,7 +307,12 @@ video#v{display:none}
 <body>
 <canvas id="c"></canvas>
 <video id="v" playsinline muted autoplay></video>
-<div id="cur">🖐️</div>
+
+<!-- Dual gesture reticle -->
+<div id="cur">
+  <div class="glove-ring" id="cur-ring">🖐️</div>
+  <div class="glove-label" id="cur-lbl">HALA ✋</div>
+</div>
 
 <div id="hud" style="display:none">
   <div id="bar">
@@ -297,7 +343,7 @@ video#v{display:none}
   <div class="f" style="font-size:clamp(14px, 4vw, 19px);color:#2e86de">Ikut Kaedah Bacalah Sayang: huruf → suku kata → perkataan → ayat 🎈</div>
   <div id="cats"></div>
   <button id="camBtn" class="btn" style="background:#1dd1a1;box-shadow:0 5px 0 #10ac84;font-size:clamp(14px, 3.8vw, 17px)" onclick="startCam()">✊ Guna Kamera Tangan (MediaPipe)</button>
-  <div style="font-weight:900;font-size:clamp(12px, 3.2vw, 15px);color:#0a5;padding-bottom:12px">Sentuh / klik belon yang betul. Dengan kamera: gerakkan jari, genggam ✊ untuk pilih.</div>
+  <div style="font-weight:900;font-size:clamp(12px, 3.2vw, 15px);color:#0a5;padding-bottom:12px">Sentuh / klik belon yang betul. Dengan kamera: halakan tangan ✋, genggam ✊ untuk pilih!</div>
 </div>
 
 <div id="res">
@@ -409,7 +455,6 @@ function avSay(t,c){
 // ===== QUESTION GENERATOR =====
 function gen(k,L,isBoss){
   const UL=BK[k],ui=uOf(k,L),cu=UL[ui];
-  // Boss level defaults to 3 fast options to keep rhythm rapid
   const n = isBoss ? 3 : (L<=15 ? 2 : (L<=45 ? 3 : 4));
   const up=UL.slice(0,ui+1),t=Math.random();
   const cw=up.flatMap(u=>u.w).filter(x=>x[1]),cc=cu.w.filter(x=>x[1]);
@@ -586,7 +631,6 @@ function dtex(txt,ic){
   return new THREE.CanvasTexture(c);
 }
 
-// Regular Balloon
 function mkMon(txt,col,ic){
   const g=new THREE.Group();
   const b=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),new THREE.MeshPhongMaterial({color:col,shininess:90,specular:0xffffff}));
@@ -627,19 +671,16 @@ function mkMon(txt,col,ic){
   return g;
 }
 
-// King Boss Balloon
 function mkBossMesh(title){
   const g=new THREE.Group();
   const b=new THREE.Mesh(new THREE.SphereGeometry(2.3,32,24),new THREE.MeshPhongMaterial({color:0x9b59b6,shininess:100,specular:0xffffff}));
   b.scale.set(1.1,1.25,1);
   g.add(b);
 
-  // Crown
   const cr=new THREE.Mesh(new THREE.CylinderGeometry(.8,.5,1,7),new THREE.MeshPhongMaterial({color:0xf1c40f,shininess:120}));
   cr.position.set(0,2.9,0);
   g.add(cr);
 
-  // Angry Glowing Eyes
   for(const s of[-1,1]){
     const e=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),new THREE.MeshBasicMaterial({color:0xff3838}));
     e.position.set(s*.7,1.1,1.8);
@@ -654,7 +695,6 @@ function mkBossMesh(title){
     g.add(horn);
   }
 
-  // Mouth
   const mth=new THREE.Mesh(new THREE.TorusGeometry(.6,.1,8,16,Math.PI),new THREE.MeshBasicMaterial({color:0x111}));
   mth.position.set(0,.2,2.0);
   g.add(mth);
@@ -682,7 +722,6 @@ function lay(){
   const t=Math.tan((cam.fov*Math.PI)/360);
   
   if(G.isBoss){
-    // Boss layout: Boss in center-back, minions along front bottom
     cam.position.z = isPortrait ? 10.5 : 9.5;
     cam.position.y = isPortrait ? -0.4 : -0.2;
     if(bossModel) {
@@ -702,7 +741,6 @@ function lay(){
   }
 
   if(isPortrait){
-    // Mobile Portrait Grid
     const cols = (n > 2) ? 2 : n;
     const rows = Math.ceil(n / cols);
     const zNeeded = Math.max(9.5, (cols * 2.6) / (2 * t * cam.aspect) * 1.05);
@@ -723,7 +761,6 @@ function lay(){
       m.scale.setScalar(Math.min(1.0, spX / 2.3));
     });
   } else {
-    // Landscape Mode
     const zNeeded = Math.max(8.5, (n * 2.4) / (2 * t * cam.aspect) * 0.98);
     cam.position.z = zNeeded;
     cam.position.y = -0.3;
@@ -752,7 +789,7 @@ function confetti(p, count=26){
   }
 }
 
-// ===== GAME STATE & BOSS FLOW =====
+// ===== GAME STATE & FLOW =====
 function buildMenu(){
   document.getElementById("hero").innerHTML=["A","B","C"].map((l,i)=>`<b style="background:${["#ff6b6b","#feca57","#1dd1a1"][i]};animation-delay:${i*.2}s">${l}</b>`).join("")+sh(ALLW).slice(0,9).map((x,i)=>`<span style="animation-delay:${i*.25}s">${x[1]}</span>`).join("");
   const d=document.getElementById("cats");
@@ -795,7 +832,7 @@ function start(k,L){
   if(isBoss){
     bWrap.style.display="block";
     qBox.classList.add("boss-box");
-    toast("⚠️ TAHAP BOS! TEGASKAN SERANGAN! ⚠️");
+    toast("⚠️ TAHAP BOS! ⚠️");
     bossWarnSound();
   } else {
     bWrap.style.display="none";
@@ -891,13 +928,12 @@ function hit(m){
     }
 
     if(G.isBoss){
-      // Boss hit mechanics
       G.bossHp = Math.max(0, G.bossHp - 1);
       hud();
       bossHitSound();
       confetti(m.position, 35);
       if(bossModel){
-        bossModel.userData.sk = 0.8; // Boss shakes on hit
+        bossModel.userData.sk = 0.8;
         confetti(bossModel.position, 20);
       }
       avSay("SERANGAN TEPAT! 💥","jump");
@@ -924,11 +960,11 @@ function hit(m){
     G.err++;
     m.userData.sk=.6;
     if(G.isBoss && bossModel){
-      bossModel.scale.multiplyScalar(1.08); // Boss laughs and looms
+      bossModel.scale.multiplyScalar(1.08);
       setTimeout(()=>bossModel&&bossModel.scale.setScalar(1), 300);
     }
-    toast(G.isBoss ? "Elak serangan Bos! Cuba lagi! 🛡️" : "Cuba lagi 💪");
-    avSay(G.isBoss ? "Hati-hati dengan Bos!" : "Cuba lagi, boleh!","shake");
+    toast(G.isBoss ? "Elak serangan Bos! 🛡️" : "Cuba lagi 💪");
+    avSay(G.isBoss ? "Hati-hati!" : "Cuba lagi, boleh!","shake");
     hud();
     say("Cuba lagi");
   }
@@ -974,7 +1010,7 @@ function nextLv(){
   start(G.k,G.L+1);
 }
 
-// ===== MOBILE INTERACTION =====
+// ===== POINTER & RAYCAST INTERACTION =====
 const rc=new THREE.Raycaster(),mv=new THREE.Vector2();
 function shoot(x,y){
   initAudio();
@@ -988,85 +1024,169 @@ cv.addEventListener("pointerdown",e=>{
   shoot(e.clientX,e.clientY);
 },{passive:true});
 
-// ===== MEDIAPIPE HANDS SETUP VIA CDN =====
-let hands=null,camFeed=null,fist=false,isReady=false;
+// ===== ROBUST MEDIAPIPE HAND TRACKING & FIST DETECTOR =====
+let hands=null, isProcessingFrame=false, cameraAnimId=null, isHitCooldown=false;
+const handState = { fistFrames: 0, hasTriggered: false };
+
+function getDistance3D(p1, p2) {
+  if (!p1 || !p2) return 0;
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  const dz = ((p1.z || 0) - (p2.z || 0)) * 1.1;
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+// Ported Super Saufi 3D Knuckle Curl Detection:
+function isFistClenched(landmarks) {
+  if (!landmarks || landmarks.length < 21) return false;
+  const wrist = landmarks[0];
+  const mcpMiddle = landmarks[9];
+  const palmScale = getDistance3D(mcpMiddle, wrist) || 0.15;
+
+  const fingers = [
+    { mcp: 5, pip: 6, dip: 7, tip: 8 },    // Index
+    { mcp: 9, pip: 10, dip: 11, tip: 12 }, // Middle
+    { mcp: 13, pip: 14, dip: 15, tip: 16 },// Ring
+    { mcp: 17, pip: 18, dip: 19, tip: 20 } // Pinky
+  ];
+
+  let curledCount = 0;
+  let extendedCount = 0;
+
+  for (let i = 0; i < fingers.length; i++) {
+    const f = fingers[i];
+    const mcp = landmarks[f.mcp];
+    const pip = landmarks[f.pip];
+    const tip = landmarks[f.tip];
+
+    const dTipMcp = getDistance3D(tip, mcp);
+    const dTipWrist = getDistance3D(tip, wrist);
+    const dPipWrist = getDistance3D(pip, wrist);
+
+    const isExtended = (dTipWrist > dPipWrist * 1.15) && (dTipMcp > palmScale * 0.65);
+    const isCurled = (dTipWrist < dPipWrist * 1.05) || (dTipMcp < palmScale * 0.68);
+
+    if (isExtended) extendedCount++;
+    if (isCurled) curledCount++;
+  }
+
+  if (extendedCount >= 1) return false;
+  return (curledCount >= 3);
+}
 
 async function startCam(){
   initAudio();
   const camBtn=document.getElementById("camBtn");
-  if(!window.Hands||!window.Camera){
-    toast("MediaPipe belum selesai dimuatkan.");
-    return;
-  }
-  if(camFeed){
-    toast("Kamera sudah aktif!");
+  if(typeof window.Hands === 'undefined'){
+    toast("MediaPipe sedang dimuatkan, sila tunggu sebentar...");
     return;
   }
 
   try{
-    camBtn.textContent="Memuatkan MediaPipe...";
-    hands=new Hands({
-      locateFile:file=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
+    camBtn.textContent="Memulakan Kamera...";
+    
+    hands = new Hands({
+      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
     });
 
     hands.setOptions({
-      maxNumHands:1,
-      modelComplexity:0,
-      minDetectionConfidence:0.6,
-      minTrackingConfidence:0.5
+      maxNumHands: 1,
+      modelComplexity: 0,
+      minDetectionConfidence: 0.45,
+      minTrackingConfidence: 0.45
     });
 
     hands.onResults(onHandResults);
-    await hands.initialize();
-    isReady=true;
 
-    const videoEl=document.getElementById("v");
-    camFeed=new Camera(videoEl,{
-      onFrame:async()=>{
-        if(isReady&&videoEl.readyState>=2){
-          await hands.send({image:videoEl});
-        }
-      },
-      width:480,
-      height:640,
-      facingMode:"user"
+    const video = document.getElementById('v');
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+      audio: false
     });
+    
+    video.srcObject = stream;
+    await video.play();
 
-    await camFeed.start();
     camBtn.style.background="#2ed573";
     camBtn.textContent="✅ Kamera Tangan Aktif";
     toast("Kamera aktif! Tunjukkan tangan.");
+
+    startVideoLoop();
   }catch(err){
-    console.error("Camera Init Error:",err);
-    toast("Kamera gagal dimulakan.");
+    console.error("Camera Init Error:", err);
+    toast("Kamera gagal diakses.");
     camBtn.textContent="✊ Guna Kamera Tangan (Cuba Lagi)";
   }
 }
 
-function onHandResults(r){
-  const c=document.getElementById("cur");
-  if(!r.multiHandLandmarks||!r.multiHandLandmarks[0]){
-    c.style.display="none";
+function startVideoLoop(){
+  if(cameraAnimId) cancelAnimationFrame(cameraAnimId);
+  const video = document.getElementById('v');
+
+  async function processVideoFrame(){
+    if (video.readyState >= 2 && hands && !isProcessingFrame) {
+      isProcessingFrame = true;
+      try {
+        await hands.send({ image: video });
+      } catch (e) {
+        console.warn("Hands frame send error:", e);
+      } finally {
+        isProcessingFrame = false;
+      }
+    }
+    cameraAnimId = requestAnimationFrame(processVideoFrame);
+  }
+  cameraAnimId = requestAnimationFrame(processVideoFrame);
+}
+
+function onHandResults(results){
+  const curEl = document.getElementById('cur');
+  const ring = document.getElementById('cur-ring');
+  const lbl = document.getElementById('cur-lbl');
+
+  if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    curEl.style.display = 'none';
+    handState.fistFrames = 0;
+    handState.hasTriggered = false;
     return;
   }
-  const l=r.multiHandLandmarks[0];
-  const d=(a,b)=>Math.hypot(l[a].x-l[b].x,l[a].y-l[b].y);
 
-  // Mirror x coordinate so gesture matches user's selfie perspective
-  const x=(1-l[9].x)*window.innerWidth;
-  const y=l[9].y*window.innerHeight;
+  const landmarks = results.multiHandLandmarks[0];
+  const isFist = isFistClenched(landmarks);
 
-  const isFist=(d(8,0)+d(12,0)+d(16,0)+d(20,0))/4/d(9,0)<1.15;
-  c.style.display="block";
-  c.style.left=x+"px";
-  c.style.top=y+"px";
-  c.textContent=isFist?"✊":"🖐️";
-  c.style.borderColor=isFist?"#2ed573":"#ff6b6b";
-
-  if(isFist&&!fist){
-    shoot(x,y);
+  if (isFist) {
+    handState.fistFrames++;
+  } else {
+    handState.fistFrames = 0;
   }
-  fist=isFist;
+
+  const isFistConfirmed = handState.fistFrames >= 2;
+
+  // Mirror X coordinate for intuitive selfie tracking
+  const screenX = (1 - landmarks[9].x) * window.innerWidth;
+  const screenY = landmarks[9].y * window.innerHeight;
+
+  curEl.style.display = 'block';
+  curEl.style.left = `${screenX}px`;
+  curEl.style.top = `${screenY}px`;
+
+  if (isFistConfirmed) {
+    ring.className = 'glove-ring clench';
+    ring.textContent = '✊';
+    lbl.textContent = 'GENGGAM! ✊';
+
+    if (!handState.hasTriggered && !isHitCooldown) {
+      handState.hasTriggered = true;
+      isHitCooldown = true;
+      shoot(screenX, screenY);
+      setTimeout(() => { isHitCooldown = false; }, 400);
+    }
+  } else {
+    handState.hasTriggered = false;
+    ring.className = 'glove-ring';
+    ring.textContent = '🖐️';
+    lbl.textContent = 'HALA ✋';
+  }
 }
 
 // ===== RENDER LOOP =====
@@ -1075,7 +1195,6 @@ const ck=new THREE.Clock();
   requestAnimationFrame(loop);
   const dt=ck.getDelta(),t=ck.elapsedTime;
 
-  // Floating Minions / Target Balloons
   mons.forEach((m,i)=>{
     const u=m.userData;
     const basePosY = u.by || 0;
@@ -1098,7 +1217,6 @@ const ck=new THREE.Clock();
     }
   });
 
-  // Boss Animation
   if(bossModel){
     bossModel.position.y = 1.8 + Math.sin(t*2.2)*0.35;
     bossModel.rotation.y = Math.sin(t*1.2)*0.15;
