@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>AVA : Jom Baca</title>
+<title>AVA : Jom Baca (Mario Arcade Edition)</title>
 
-<!-- Favicon & Touch Icon -->
 <link rel="icon" type="image/png" href="https://i.imgur.com/PL6WHAc.png">
 <link rel="apple-touch-icon" href="https://i.imgur.com/PL6WHAc.png">
 
@@ -18,7 +17,7 @@
 <!-- Three.js (r128) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- MediaPipe Hands CDN -->
+<!-- MediaPipe Hands & Camera Utils CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
 
@@ -30,13 +29,60 @@ html,body{
   height:100%;
   overflow:hidden;
   font-family:'Nunito',sans-serif;
-  background:#7fd8ff;
+  background:#5c94fc; /* Mario Sky Blue */
   position:fixed;
   inset:0;
 }
 canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
 .f{font-family:'Lilita One',cursive}
 
+/* Kesan Font Kartun / Mario Arcade */
+.stroke-mario{
+  text-shadow:
+    -3px -3px 0 #000, 3px -3px 0 #000,
+    -3px 3px 0 #000, 3px 3px 0 #000,
+    0 6px 0 rgba(0,0,0,0.5);
+}
+.stroke-sm{
+  text-shadow:
+    -2px -2px 0 #000, 2px -2px 0 #000,
+    -2px 2px 0 #000, 2px 2px 0 #000,
+    0 3px 0 rgba(0,0,0,0.4);
+}
+
+/* Kotak & Butang 3D Arcade */
+.box-arcade{
+  background:#fff;
+  border:4px solid #000;
+  border-radius:24px;
+  box-shadow:0 8px 0 #000, 0 12px 20px rgba(0,0,0,0.3);
+}
+
+.btn-mario{
+  font-family:'Lilita One', cursive;
+  font-size:clamp(16px, 4.5vw, 22px);
+  border:4px solid #000;
+  border-radius:26px;
+  padding:10px 24px;
+  color:#fff;
+  cursor:pointer;
+  transition:transform 0.08s ease, box-shadow 0.08s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  letter-spacing:0.5px;
+}
+.btn-mario:active{
+  transform:translateY(6px);
+  box-shadow:0 2px 0 #000 !important;
+}
+.btn-red{ background:#e52521; box-shadow:0 8px 0 #990000; }
+.btn-green{ background:#43b047; box-shadow:0 8px 0 #1b661e; }
+.btn-yellow{ background:#fbd000; color:#000; box-shadow:0 8px 0 #b39200; }
+.btn-blue{ background:#049cd8; box-shadow:0 8px 0 #025d82; }
+
+/* HUD Permainan */
 #hud{
   position:fixed;
   top:env(safe-area-inset-top, 0px);
@@ -48,81 +94,153 @@ canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
   gap:8px;
   padding:8px 10px;
   pointer-events:none;
-  z-index:10;
+  z-index:25;
 }
 #bar{display:flex;gap:6px;align-items:center;pointer-events:auto;flex-wrap:wrap;justify-content:center}
 .pill{
-  background:#fff;
-  border:3px solid #ff9f1c;
-  border-radius:24px;
-  padding:3px 10px;
+  background:#fbd000;
+  border:3px solid #000;
+  border-radius:22px;
+  padding:4px 12px;
   font-weight:900;
-  color:#d35400;
+  color:#000;
   font-size:clamp(12px, 3.4vw, 16px);
-  box-shadow:0 3px 0 #0001;
+  box-shadow:0 4px 0 #000;
 }
 .pill-boss{
-  background:#e74c3c;
-  border-color:#c0392b;
+  background:#e52521;
   color:#fff;
-  animation:pulse 1s infinite alternate;
+  animation:bossPulse 0.9s infinite alternate;
 }
-@keyframes pulse{
+@keyframes bossPulse{
   0%{transform:scale(1)}
   100%{transform:scale(1.08)}
 }
 
-.btn{
-  font-family:'Lilita One';
-  font-size:clamp(16px, 4.5vw, 22px);
-  border:0;
-  border-radius:24px;
-  padding:8px 18px;
-  color:#fff;
-  background:#ff6b6b;
-  box-shadow:0 5px 0 #c0392b;
-  cursor:pointer;
-  touch-action:manipulation;
-}
-.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #c0392b}
-
 #q{
   background:#fff;
-  border:4px solid #54a0ff;
-  border-radius:22px;
-  padding:6px 16px;
+  border:5px solid #000;
+  border-radius:26px;
+  padding:8px 20px;
   text-align:center;
   pointer-events:auto;
   cursor:pointer;
   max-width:92vw;
-  box-shadow:0 6px 0 #0002;
-  transition:border-color .3s;
+  box-shadow:0 8px 0 #000;
+  transition:transform 0.15s ease;
 }
+#q:hover{transform:scale(1.02)}
 #q.boss-box{
-  border-color:#e74c3c;
-  box-shadow:0 6px 0 #c0392b55;
+  background:#ffeaa7;
+  border-color:#d63031;
 }
 #qe{font-size:clamp(38px, 12vw, 76px);line-height:1.05}
-#qt{font-family:'Lilita One';font-size:clamp(18px, 5.2vw, 28px);color:#2e86de}
-#q.boss-box #qt{color:#c0392b}
+#qt{font-family:'Lilita One';font-size:clamp(18px, 5.2vw, 28px);color:#049cd8}
 
 #boss-bar-wrap{
   display:none;
   width:min(90vw, 320px);
-  background:#ffffffcc;
-  border:3px solid #c0392b;
-  border-radius:18px;
+  background:#fff;
+  border:4px solid #000;
+  border-radius:20px;
   padding:4px;
-  box-shadow:0 4px 0 #0002;
+  box-shadow:0 6px 0 #000;
 }
 #boss-bar-fill{
-  height:14px;
-  background:linear-gradient(90deg, #ff4757, #ff6b81);
-  border-radius:10px;
+  height:16px;
+  background:linear-gradient(90deg, #ff4757, #e52521);
+  border-radius:12px;
   width:100%;
   transition:width .3s ease-out;
 }
 
+/* WINDOW PREVIEW KAMERA KECIL */
+#cam-pip{
+  position:fixed;
+  right:calc(10px + env(safe-area-inset-right, 0px));
+  bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+  width:130px;
+  height:98px;
+  background:#1e272e;
+  border:4px solid #000;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 6px 0 #000, 0 10px 20px rgba(0,0,0,0.4);
+  display:none;
+  z-index:40;
+}
+#cam-pip-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1);
+}
+#cam-pip-badge{
+  position:absolute;
+  top:4px;
+  left:4px;
+  background:#000000cc;
+  color:#2ed573;
+  font-size:9px;
+  font-weight:900;
+  padding:2px 6px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+#cam-pip-badge .led{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#2ed573;
+  animation:blink 1.2s infinite;
+}
+@keyframes blink{50%{opacity:0.3}}
+
+/* KURSOR GESTUR KARTUN */
+#cur{
+  position:fixed;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  display:none;
+  z-index:90;
+}
+.glove-ring{
+  width:62px;
+  height:62px;
+  border-radius:50%;
+  border:4px solid #000;
+  background:rgba(251, 208, 0, 0.85);
+  box-shadow:0 6px 0 #000, 0 0 25px rgba(251, 208, 0, 0.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  transition:all 0.1s ease-out;
+}
+.glove-ring.clench{
+  background:#e52521;
+  transform:scale(1.25);
+  box-shadow:0 6px 0 #000, 0 0 35px rgba(229, 37, 33, 1);
+}
+.glove-label{
+  position:absolute;
+  bottom:-24px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#fff;
+  border:3px solid #000;
+  color:#000;
+  font-size:10px;
+  font-weight:900;
+  padding:2px 8px;
+  border-radius:12px;
+  white-space:nowrap;
+  box-shadow:0 3px 0 #000;
+}
+
+/* MENU UTAMA / HOMEPAGE INTERAKTIF */
 #menu,#res{
   position:fixed;
   inset:0;
@@ -130,110 +248,140 @@ canvas#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  gap:10px;
-  background:linear-gradient(#7fd8ffee,#c6f6d5ee);
-  padding:calc(12px + env(safe-area-inset-top, 0px)) 12px calc(18px + env(safe-area-inset-bottom, 0px)) 12px;
+  gap:12px;
+  background:
+    radial-gradient(circle at 50% 20%, #7fd8ff 0%, #5c94fc 50%, #2e86de 100%);
+  padding:calc(12px + env(safe-area-inset-top, 0px)) 14px calc(24px + env(safe-area-inset-bottom, 0px)) 14px;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   text-align:center;
-  z-index:20;
+  z-index:30;
 }
 #res{display:none;justify-content:center}
 
-h1{
-  font-family:'Lilita One';
-  font-size:clamp(32px, 9vw, 68px);
-  margin:0;
-  color:#ff6b6b;
-  text-shadow:0 3px 0 #fff,0 6px 0 #ff9f1c;
-  line-height:1.1;
+.logo-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+}
+.logo-img{
+  width:clamp(85px, 24vw, 130px);
+  aspect-ratio:1;
+  object-fit:cover;
+  border-radius:50%;
+  border:5px solid #000;
+  background:#fff;
+  box-shadow:0 8px 0 #000, 0 14px 20px rgba(0,0,0,0.3);
+  animation:marioBounce 2s ease-in-out infinite;
+}
+@keyframes marioBounce{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-8px) scale(1.05)}
+}
+
+/* Kad Input Nama Pemain */
+#player-card{
+  width:min(94vw, 420px);
+  padding:12px 16px;
+  background:#fff;
+  border:4px solid #000;
+  border-radius:24px;
+  box-shadow:0 8px 0 #000;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+#player-input{
+  width:100%;
+  font-family:'Lilita One', cursive;
+  font-size:clamp(16px, 4.5vw, 22px);
+  padding:8px 14px;
+  border:3px solid #000;
+  border-radius:18px;
+  background:#fff8e7;
+  color:#2d3436;
+  text-align:center;
+  outline:none;
+  box-shadow:inset 0 3px 6px rgba(0,0,0,0.1);
+}
+#player-input:focus{
+  background:#fff;
+  border-color:#e52521;
+}
+
+#badge-showcase{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:center;
+  background:#fff;
+  padding:8px 14px;
+  border-radius:20px;
+  border:4px solid #000;
+  box-shadow:0 6px 0 #000;
+  max-width:920px;
+  width:100%;
+}
+.badge-pill{
+  font-size:11px;
+  font-weight:900;
+  padding:4px 10px;
+  border-radius:14px;
+  background:#e2e8f0;
+  color:#64748b;
+  border:2px solid #94a3b8;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.badge-pill.unlocked{
+  background:#fbd000;
+  color:#000;
+  border-color:#000;
+  box-shadow:0 3px 0 #000;
 }
 
 #cats{
   display:grid;
   grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-  gap:10px;
+  gap:12px;
   width:100%;
-  max-width:880px;
+  max-width:920px;
   margin:4px 0 10px;
 }
 .cat{
-  border-radius:20px;
-  padding:10px 8px;
+  border-radius:22px;
+  padding:12px 10px;
   color:#fff;
-  box-shadow:0 6px 0 #0003;
+  box-shadow:0 8px 0 #000;
   cursor:pointer;
-  border:4px solid #fff;
-  transition:.15s;
+  border:4px solid #000;
+  transition:transform 0.15s ease;
+  position:relative;
 }
-.cat:hover{transform:scale(1.02)}
-.cat .e{font-size:clamp(26px, 7vw, 36px)}
-.cat b{font-family:'Lilita One';font-size:clamp(15px, 4vw, 20px);display:block;margin:2px 0}
-.cat small{display:block;font-size:clamp(10px, 2.8vw, 13px);opacity:.95;line-height:1.2}
-.cat .lv{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:6px}
-.cat .lv button{width:30px;height:30px;border-radius:50%;border:0;font-size:16px;font-weight:900;background:#fff;cursor:pointer}
+.cat:hover{transform:scale(1.03)}
+.cat .e{font-size:clamp(26px, 7vw, 36px);filter:drop-shadow(0 3px 0 #000)}
+.cat b{font-family:'Lilita One';font-size:clamp(16px, 4vw, 20px);display:block;margin:3px 0;text-shadow:0 2px 0 #000}
+.cat small{display:block;font-size:clamp(10px, 2.8vw, 12px);font-weight:800;opacity:.95;line-height:1.2;text-shadow:0 1px 0 #000}
+.cat .lv{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:8px}
+.cat .lv button{width:30px;height:30px;border-radius:50%;border:3px solid #000;font-size:14px;font-weight:900;background:#fff;cursor:pointer;box-shadow:0 3px 0 #000}
+.cat .lv button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
 
-#hero{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
-#hero span{font-size:clamp(24px, 7vw, 44px);animation:fl 2s ease-in-out infinite}
-#hero b{
-  font-family:'Lilita One';
-  width:clamp(36px, 9vw, 52px);
-  height:clamp(36px, 9vw, 52px);
-  border-radius:12px;
-  color:#fff;
-  font-size:clamp(22px, 6.5vw, 34px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 4px 0 #0003;
-  animation:fl 1.6s ease-in-out infinite;
-}
-@keyframes fl{50%{transform:translateY(-8px) rotate(6deg)}}
-
-/* Gesture Reticle (Super Saufi style) */
-#cur{
-  position:fixed;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-  display:none;
-  z-index:90;
-  transition:transform 0.08s ease-out;
-}
-.glove-ring{
-  width:58px;
-  height:58px;
-  border-radius:50%;
-  border:3px solid #2ed573;
-  background:rgba(46, 213, 115, 0.25);
-  box-shadow:0 0 20px rgba(46, 213, 115, 0.6);
-  backdrop-filter:blur(2px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
-  transition:all 0.15s ease-out;
-}
-.glove-ring.clench{
-  border-color:#ff4757;
-  background:rgba(255, 71, 87, 0.55);
-  box-shadow:0 0 35px rgba(255, 71, 87, 0.9);
-  transform:scale(1.2);
-}
-.glove-label{
+.cat-badge-tag{
   position:absolute;
-  bottom:-22px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#1e293be6;
-  border:1px solid #ffffff66;
-  color:#fff;
+  top:-10px;
+  right:-8px;
+  background:#fbd000;
+  color:#000;
   font-size:10px;
   font-weight:900;
-  padding:2px 8px;
-  border-radius:10px;
-  white-space:nowrap;
-  text-transform:uppercase;
-  letter-spacing:0.5px;
+  padding:3px 8px;
+  border-radius:14px;
+  border:3px solid #000;
+  box-shadow:0 4px 0 #000;
+  display:none;
 }
 
 #toast{
@@ -242,32 +390,22 @@ h1{
   bottom:12%;
   transform:translateX(-50%);
   font-family:'Lilita One';
-  font-size:clamp(24px, 7vw, 44px);
+  font-size:clamp(26px, 7vw, 48px);
   color:#fff;
-  text-shadow:0 3px 0 #e67e22;
+  text-shadow:-3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 6px 0 rgba(0,0,0,0.6);
   pointer-events:none;
   opacity:0;
   transition:opacity .2s;
   z-index:70;
   white-space:nowrap;
 }
-video#v{
-  position:fixed;
-  top:0;
-  left:0;
-  width:1px;
-  height:1px;
-  opacity:0.01;
-  pointer-events:none;
-  z-index:-1;
-}
 
 .avimg{
   aspect-ratio:1;
   object-fit:cover;
   border-radius:50%;
-  border:4px solid #ff6b9d;
-  box-shadow:0 5px 0 #0003;
+  border:4px solid #000;
+  box-shadow:0 6px 0 #000;
   background:#fff;
   animation:ab 2.4s ease-in-out infinite;
   display:block;
@@ -276,7 +414,7 @@ video#v{
   position:fixed;
   left:calc(10px + env(safe-area-inset-left, 0px));
   bottom:calc(10px + env(safe-area-inset-bottom, 0px));
-  width:clamp(65px, 16vw, 105px);
+  width:clamp(65px, 16vw, 95px);
   display:none;
   z-index:15;
   pointer-events:none;
@@ -286,18 +424,18 @@ video#v{
   left:100%;
   bottom:65%;
   background:#fff;
-  border:3px solid #ff6b9d;
+  border:3px solid #000;
   border-radius:18px;
-  padding:5px 10px;
+  padding:6px 12px;
   font-family:'Lilita One';
-  color:#d63384;
-  font-size:clamp(14px, 4vw, 20px);
+  color:#e52521;
+  font-size:clamp(14px, 4vw, 18px);
   white-space:nowrap;
   display:none;
-  box-shadow:0 3px 0 #0002;
+  box-shadow:0 4px 0 #000;
 }
 
-@keyframes ab{50%{transform:translateY(-5px)}}
+@keyframes ab{50%{transform:translateY(-6px)}}
 @keyframes jp{0%,100%{transform:translateY(0)}40%{transform:translateY(-24px) scale(1.12)}}
 @keyframes sk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .avimg.jump{animation:jp .6s}
@@ -305,18 +443,28 @@ video#v{
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<video id="v" playsinline muted autoplay></video>
 
-<!-- Dual gesture reticle -->
+<canvas id="c"></canvas>
+
+<!-- Window Preview Kamera Kecil (Live HUD) -->
+<div id="cam-pip">
+  <video id="cam-pip-video" playsinline muted autoplay></video>
+  <div id="cam-pip-badge">
+    <span class="led"></span>
+    <span id="pip-status">KAMERA SIAP</span>
+  </div>
+</div>
+
+<!-- Kursor Tangan Gestur Arcade -->
 <div id="cur">
   <div class="glove-ring" id="cur-ring">🖐️</div>
   <div class="glove-label" id="cur-lbl">HALA ✋</div>
 </div>
 
+<!-- Game HUD -->
 <div id="hud" style="display:none">
   <div id="bar">
-    <button class="btn" style="padding:3px 12px;font-size:16px" onclick="toMenu()">🏠</button>
+    <button class="btn-mario btn-red" style="padding:4px 14px;font-size:16px" onclick="toMenu()">🏠 KELUAR</button>
     <span class="pill" id="pl"></span>
     <span class="pill" id="ps"></span>
     <span class="pill" id="ph">❤️❤️❤️</span>
@@ -331,36 +479,65 @@ video#v{
 </div>
 
 <div id="toast"></div>
+
+<!-- Mascot Avatar -->
 <div id="av">
   <div id="bub"></div>
   <img class="avimg" id="av_ingame" alt="avatar">
 </div>
 
+<!-- MENU UTAMA / HOMEPAGE MARIO ARCADE -->
 <div id="menu">
-  <img class="avimg" id="avm" style="width:clamp(75px, 22vw, 115px)" alt="avatar">
-  <h1>AVA : Jom Baca</h1>
+  <div class="logo-wrap">
+    <img src="https://i.imgur.com/PL6WHAc.png" class="logo-img avimg" id="avm" alt="Logo AVA">
+    <h1 class="f stroke-mario" style="color:#fbd000;font-size:clamp(36px, 10vw, 72px);margin:0">AVA : JOM BACA!</h1>
+    <div class="f stroke-sm" style="color:#fff;font-size:clamp(15px, 4.2vw, 20px)">
+      ⭐ ARCADE PINTAR BACAAN PRASEKOLAH & TAHAP 1 ⭐
+    </div>
+  </div>
+
   <div id="hero"></div>
-  <div class="f" style="font-size:clamp(14px, 4vw, 19px);color:#2e86de">Ikut Kaedah Bacalah Sayang: huruf → suku kata → perkataan → ayat 🎈</div>
+
+  <!-- Kad Input Nama Pemain -->
+  <div id="player-card">
+    <label class="f" style="color:#000;font-size:16px">MASUKKAN NAMA WIRA ANDA:</label>
+    <input type="text" id="player-input" placeholder="Nama Anda (cth: Saufi)" maxlength="20">
+    <span style="font-size:11px;font-weight:900;color:#636e72">Nama anda akan dipaparkan semasa bermain & ganjaran lencana!</span>
+  </div>
+
+  <!-- Pameran Badge Kemenangan -->
+  <div id="badge-showcase">
+    <span class="f" style="font-size:13px;color:#d35400;width:100%">🏆 KOLEKSI LENCANA WIRA BACAAN:</span>
+    <div id="badge-list" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div>
+  </div>
+
+  <!-- Senarai Kategori -->
   <div id="cats"></div>
-  <button id="camBtn" class="btn" style="background:#1dd1a1;box-shadow:0 5px 0 #10ac84;font-size:clamp(14px, 3.8vw, 17px)" onclick="startCam()">✊ Guna Kamera Tangan (MediaPipe)</button>
-  <div style="font-weight:900;font-size:clamp(12px, 3.2vw, 15px);color:#0a5;padding-bottom:12px">Sentuh / klik belon yang betul. Dengan kamera: halakan tangan ✋, genggam ✊ untuk pilih!</div>
+
+  <button id="camBtn" class="btn-mario btn-green" onclick="startCam()">
+    ✊ BUKA KAMERA TANGAN (MEDIAPIPE)
+  </button>
+
+  <div class="f stroke-sm" style="color:#fff;font-size:clamp(12px, 3.4vw, 15px);padding-bottom:14px">
+    Pilih kategori di atas untuk mulakan misi membaca! 🍄
+  </div>
 </div>
 
+<!-- Skrin Keputusan -->
 <div id="res">
-  <h1 id="rt">Hebat!</h1>
+  <h1 id="rt" class="f stroke-mario" style="color:#fbd000;font-size:clamp(44px, 12vw, 84px)">Hebat!</h1>
   <div id="rs" style="font-size:clamp(50px, 15vw, 75px)"></div>
-  <div class="f" id="rm" style="font-size:clamp(18px, 5vw, 24px);color:#d35400"></div>
-  <div style="display:flex;gap:10px;margin-top:10px">
-    <button class="btn" style="background:#1dd1a1;box-shadow:0 5px 0 #10ac84" onclick="nextLv()">Tahap Seterusnya ▶</button>
-    <button class="btn" onclick="toMenu()">Menu</button>
+  <div class="f stroke-sm" id="rm" style="font-size:clamp(18px, 5.5vw, 26px);color:#fff"></div>
+  <div style="display:flex;gap:12px;margin-top:10px">
+    <button class="btn-mario btn-green" onclick="nextLv()">Tahap Seterusnya ▶</button>
+    <button class="btn-mario btn-yellow" onclick="toMenu()">Menu Utama</button>
   </div>
 </div>
 
 <script>
-// ===== AVATAR ASSET =====
+// ===== AVATAR & DATA =====
 const AV_URL = "https://i.imgur.com/PL6WHAc.png";
 
-// ===== DATA SOURCES =====
 const pw=s=>s.split(" ").filter(Boolean).map(x=>{const m=x.match(/^[A-Za-z_-]+/)[0];return[m.replace(/_/g," "),x.slice(m.length)]});
 const ps=s=>s?s.split("/").map(x=>{const m=x.match(/^(.*?\.)(.*)$/);return[m[1],m[2]]}):[];
 const pu=t=>t.trim().split("\n").map(l=>{const f=l.split("|");return{t:f[0],g:f[1],syl:f[2].split(" ").filter(Boolean),w:pw(f[3]),s:ps(f[4])}});
@@ -419,18 +596,31 @@ Pekerjaan & Alam|||jurubina👷 jurukamera📸 petani👨‍🌾 matahari☀️ 
 
 const BK={huruf:B1,suku:B1.filter(u=>u.syl.length),kata:B1,ayat:B1,buku2:B2,tema:TM};
 const ALLW=[...B1,...B2,...TM].flatMap(u=>u.w).filter(x=>x[1]);
+
 const CATS=[
-  {k:"huruf",n:"Kenal Huruf & Bunyi",e:"🔤",c:"#ff6b6b",d:"Vokal a-i-u-e-o dahulu, kemudian k, b, d, c…"},
-  {k:"suku",n:"Bina Suku Kata",e:"🧩",c:"#10ac84",d:"ka ki ku ke ko · ba bi bu be bo…"},
-  {k:"kata",n:"Baca Perkataan",e:"📖⚽👕",c:"#2e86de",d:"Gabung suku kata & baca bergambar"},
-  {k:"ayat",n:"Baca Ayat",e:"💬",c:"#f39c12",d:"Lengkapkan ayat daripada cerita Buku 1"},
-  {k:"buku2",n:"Suku Kata Tertutup",e:"🔡",c:"#a55eea",d:"Buku 2: ng, ny, ak, at, am, an, sya, kha…"},
-  {k:"tema",n:"Dunia Bergambar",e:"🐘🍍🌺",c:"#e84393",d:"Haiwan, buah, sayur, bunga, pakaian…"}
+  {k:"huruf",n:"Kenal Huruf",badge:"Wira Vokal",e:"🔤",c:"#e52521",d:"Buku 1: Vokal a-i-u-e-o & konsonan awal"},
+  {k:"suku",n:"Bina Suku Kata",badge:"Wira Suku Kata",e:"🧩",c:"#43b047",d:"Buku 1: ka ki ku ke ko · ba bi bu..."},
+  {k:"kata",n:"Baca Perkataan",badge:"Wira Perkataan",e:"📖",c:"#049cd8",d:"Buku 1: Cantum suku kata bergambar"},
+  {k:"ayat",n:"Baca Ayat",badge:"Wira Cerita",e:"💬",c:"#fbd000",d:"Buku 1: Lengkapkan ayat cerita pendek"},
+  {k:"buku2",n:"Suku Kata Tertutup",badge:"Wira Buku 2",e:"🔡",c:"#9b59b6",d:"Buku 2: ng, ny, ak, at, am, an, sya..."},
+  {k:"tema",n:"Dunia Bergambar",badge:"Wira Kosa Kata",e:"🐘",c:"#e84393",d:"Tema: Haiwan, buah, sayur & alam"}
 ];
 
-const COL=[0xff4757,0xffa502,0xffd32a,0x2ed573,0x1e90ff,0xa55eea,0xff6b9d];
-const P=(()=>{try{return JSON.parse(localStorage.ava||"{}")}catch(e){return{}}})();
-const sv=()=>{try{localStorage.ava=JSON.stringify(P)}catch(e){}};
+// Mario Palette Warna Belon
+const COL=[0xe52521, 0x43b047, 0x049cd8, 0xfbd000, 0xff793f, 0x9b59b6, 0x00d2d3];
+
+const P=(()=>{try{return JSON.parse(localStorage.ava_progress||"{}")}catch(e){return{}}})();
+const B=(()=>{try{return JSON.parse(localStorage.ava_badges||"{}")}catch(e){return{}}})();
+let playerName = localStorage.ava_player || "Wira";
+
+const sv=()=>{
+  try{
+    localStorage.ava_progress=JSON.stringify(P);
+    localStorage.ava_badges=JSON.stringify(B);
+    localStorage.ava_player=playerName;
+  }catch(e){}
+};
+
 const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const U=s=>s[0].toUpperCase()+s.slice(1);
 const snd=l=>"aiueo".includes(l)?l:l+"eh";
@@ -452,7 +642,7 @@ function avSay(t,c){
   avSay.h=setTimeout(()=>{b.style.display="none";i.className="avimg"},1800);
 }
 
-// ===== QUESTION GENERATOR =====
+// ===== GENERATOR SOALAN =====
 function gen(k,L,isBoss){
   const UL=BK[k],ui=uOf(k,L),cu=UL[ui];
   const n = isBoss ? 3 : (L<=15 ? 2 : (L<=45 ? 3 : 4));
@@ -469,16 +659,16 @@ function gen(k,L,isBoss){
     const ex=l=>{const x=ALLW.find(y=>y[0][0]==l);return x?x[1]:""};
     if(t<.5){
       const a=cu.g&&Math.random()<.6?cu.g:rnd(LS),o=opts(a,LS,n);
-      return{e:"👂",t:`Bunyi "${snd(a)}" — huruf mana?`,say:`Bunyi ${snd(a)}`,o:o.map(x=>U(x)+x),ic:o.map(ex),a:o.indexOf(a),rv:{e:ex(a)||"🔤",t:`${U(a)}${a} — ${snd(a)}`}}
+      return{e:"👂",t:`Bunyi "${snd(a)}" — huruf mana?`,say:`Bunyi ${snd(a)}`,o:o.map(x=>U(x)+x),ic:o.map(ex),a:o.indexOf(a),rv:{e:ex(a)||"🔤",t:`${U(a)}${a} —${snd(a)}`}}
     }
     const w=pickW(),a=w[0][0],o=opts(a,LS,n);
-    return{e:w[1],t:`${U(w[0])} — huruf awal?`,say:`${w[0]}. Bunyi ${snd(a)}`,o:o.map(x=>U(x)+x),a:o.indexOf(a),rv:{e:w[1],t:U(w[0])}}
+    return{e:w[1],t:`${U(w[0])} — huruf awal?`,say:`${w[0]}. Bunyi${snd(a)}`,o:o.map(x=>U(x)+x),a:o.indexOf(a),rv:{e:w[1],t:U(w[0])}}
   }
   if(k=="suku"){
     const S0=up.flatMap(u=>u.syl),S=S0.length<n?[...S0,..."ba bi bu ka ki".split(" ")]:S0,w=pickW(),f=w[0].slice(0,2);
     if(t<.35&&/^[^aiueo][aiueo]/.test(w[0])){
       const o=opts(f,S,n);
-      return{e:w[1],t:`${U(w[0])} — suku kata awal?`,say:`${w[0]}. ${f}`,o,a:o.indexOf(f),rv:{e:w[1],t:`${U(w[0])} (${f})`}}
+      return{e:w[1],t:`${U(w[0])} — suku kata awal?`,say:`${w[0]}.${f}`,o,a:o.indexOf(f),rv:{e:w[1],t:U(w[0])} (${f})`}}
     }
     const a=Math.random()<.6?rnd(cu.syl):rnd(S0),o=opts(a,S,n);
     return{e:"🔊",t:"Dengar suku kata. Yang mana?",say:a,o,a:o.indexOf(a),rv:{e:"👏",t:a}}
@@ -515,7 +705,7 @@ function gen(k,L,isBoss){
   return t<.65?pic(w):wpic(w);
 }
 
-// ===== AUDIO & SPEECH =====
+// ===== AUDIO & SFX CARTOON =====
 let au=null;
 function initAudio(){
   if(!au){
@@ -542,15 +732,11 @@ function beep(f,d,tp="sine",t0=0){
     o.stop(t+d);
   }catch(e){}
 }
-const good=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.2,"triangle",i*.09));
-const bad=()=>{beep(220,.25,"sawtooth");beep(180,.3,"sawtooth",.15)};
-const bossHitSound=()=>{
-  beep(120,.15,"sawtooth");
-  beep(300,.25,"triangle",.05);
-};
-const bossWarnSound=()=>{
-  [220, 220, 440].forEach((f,i)=>beep(f,.2,"sawtooth",i*.15));
-};
+// Bunyi ala syiling & lompatan Mario
+const good=()=>[987, 1318].forEach((f,i)=>beep(f,.15,"triangle",i*.08));
+const bad=()=>{beep(160,.2,"sawtooth");beep(110,.25,"sawtooth",.1)};
+const bossHitSound=()=>{beep(120,.15,"square");beep(320,.2,"triangle",.05)};
+const bossWarnSound=()=>{[260, 260, 520].forEach((f,i)=>beep(f,.18,"sawtooth",i*.12))};
 
 function say(t){
   if(!t||!window.speechSynthesis)return;
@@ -558,59 +744,62 @@ function say(t){
   const u=new SpeechSynthesisUtterance(t);
   u.lang="ms-MY";
   u.rate=.8;
-  u.pitch=1.2;
+  u.pitch=1.25;
   speechSynthesis.speak(u);
 }
 
-// ===== 3D ENGINE (THREE.JS MOBILE RESPONSIVE) =====
+// ===== 3D ENGINE (THREE.JS CARTOON WORLD) =====
 const cv=document.getElementById("c");
 const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 R.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
 
 const S=new THREE.Scene();
-S.background=new THREE.Color(0x7fd8ff);
-S.fog=new THREE.Fog(0x7fd8ff,16,40);
+S.background=new THREE.Color(0x5c94fc); // Biru Langit Mario
+S.fog=new THREE.Fog(0x5c94fc,18,45);
 
 const cam=new THREE.PerspectiveCamera(52,1,.1,100);
 cam.position.set(0,0,10);
 
-S.add(new THREE.HemisphereLight(0xffffff,0xffe0a0,1.1));
-const dl=new THREE.DirectionalLight(0xffffff,.8);
-dl.position.set(4,8,8);
+S.add(new THREE.HemisphereLight(0xffffff,0xffe0a0,1.2));
+const dl=new THREE.DirectionalLight(0xffffff,0.9);
+dl.position.set(5,10,8);
 S.add(dl);
 
-const sun=new THREE.Mesh(new THREE.SphereGeometry(1.6,24,16),new THREE.MeshBasicMaterial({color:0xffe14d}));
-sun.position.set(-7,6,-8);
+// Matahari Kartun Ceria
+const sun=new THREE.Mesh(new THREE.SphereGeometry(1.8,24,16),new THREE.MeshBasicMaterial({color:0xfbd000}));
+sun.position.set(-7,6,-9);
 S.add(sun);
 
+// Awan Putih Kartun (Mario Fluffy Clouds)
 const clouds=[];
-for(let i=0;i<7;i++){
+for(let i=0;i<8;i++){
   const g=new THREE.Group();
   for(let j=0;j<4;j++){
-    const m=new THREE.Mesh(new THREE.SphereGeometry(.7+Math.random()*.5,14,10),new THREE.MeshLambertMaterial({color:0xffffff}));
-    m.position.set(j*.8,Math.random()*.4,0);
+    const m=new THREE.Mesh(new THREE.SphereGeometry(.75+Math.random()*.5,14,10),new THREE.MeshLambertMaterial({color:0xffffff}));
+    m.position.set(j*.85,Math.random()*.4,0);
     g.add(m);
   }
-  g.position.set(Math.random()*30-15,Math.random()*7-1,-6-Math.random()*6);
+  g.position.set(Math.random()*34-17,Math.random()*7-1,-7-Math.random()*6);
   S.add(g);
   clouds.push(g);
 }
 
-const hills=new THREE.Mesh(new THREE.SphereGeometry(12,32,16),new THREE.MeshLambertMaterial({color:0x55e06b}));
-hills.position.set(0,-16,-4);
+// Bukit Hijau Kartun di Bawah (Mario Grass Hills)
+const hills=new THREE.Mesh(new THREE.SphereGeometry(14,32,16),new THREE.MeshLambertMaterial({color:0x43b047}));
+hills.position.set(0,-18,-4);
 S.add(hills);
 
 function dtex(txt,ic){
   const c=document.createElement("canvas");
   c.width=256;c.height=256;
   const x=c.getContext("2d");
-  x.fillStyle="#fff";
+  x.fillStyle="#ffffff";
   x.beginPath();
-  if(x.roundRect)x.roundRect(8,8,240,240,50);
+  if(x.roundRect)x.roundRect(8,8,240,240,46);
   else x.rect(8,8,240,240);
   x.fill();
-  x.lineWidth=10;
-  x.strokeStyle="#ff9f1c";
+  x.lineWidth=12;
+  x.strokeStyle="#000000";
   x.stroke();
   x.fillStyle="#2d3436";
   x.textAlign="center";
@@ -633,14 +822,15 @@ function dtex(txt,ic){
 
 function mkMon(txt,col,ic){
   const g=new THREE.Group();
-  const b=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),new THREE.MeshPhongMaterial({color:col,shininess:90,specular:0xffffff}));
+  const b=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),new THREE.MeshPhongMaterial({color:col,shininess:100,specular:0xffffff}));
   b.scale.set(1,1.15,1);
   g.add(b);
 
+  // Mata Kartun
   for(const s of[-1,1]){
     const e=new THREE.Mesh(new THREE.SphereGeometry(.22,16,12),new THREE.MeshBasicMaterial({color:0xffffff}));
     e.position.set(s*.38,.55,.85);
-    const p=new THREE.Mesh(new THREE.SphereGeometry(.1,12,8),new THREE.MeshBasicMaterial({color:0}));
+    const p=new THREE.Mesh(new THREE.SphereGeometry(.1,12,8),new THREE.MeshBasicMaterial({color:0x000}));
     p.position.set(0,0,.18);
     e.add(p);
     g.add(e);
@@ -671,31 +861,31 @@ function mkMon(txt,col,ic){
   return g;
 }
 
-function mkBossMesh(title){
+function mkBossMesh(){
   const g=new THREE.Group();
-  const b=new THREE.Mesh(new THREE.SphereGeometry(2.3,32,24),new THREE.MeshPhongMaterial({color:0x9b59b6,shininess:100,specular:0xffffff}));
+  const b=new THREE.Mesh(new THREE.SphereGeometry(2.3,32,24),new THREE.MeshPhongMaterial({color:0xe52521,shininess:120,specular:0xffffff}));
   b.scale.set(1.1,1.25,1);
   g.add(b);
 
-  const cr=new THREE.Mesh(new THREE.CylinderGeometry(.8,.5,1,7),new THREE.MeshPhongMaterial({color:0xf1c40f,shininess:120}));
+  const cr=new THREE.Mesh(new THREE.CylinderGeometry(.8,.5,1,7),new THREE.MeshPhongMaterial({color:0xfbd000,shininess:140}));
   cr.position.set(0,2.9,0);
   g.add(cr);
 
   for(const s of[-1,1]){
-    const e=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),new THREE.MeshBasicMaterial({color:0xff3838}));
+    const e=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),new THREE.MeshBasicMaterial({color:0xffff00}));
     e.position.set(s*.7,1.1,1.8);
     const p=new THREE.Mesh(new THREE.SphereGeometry(.14,12,8),new THREE.MeshBasicMaterial({color:0x000}));
     p.position.set(0,0,.3);
     e.add(p);
     g.add(e);
 
-    const horn=new THREE.Mesh(new THREE.ConeGeometry(.35,1.2,10),new THREE.MeshPhongMaterial({color:0x2c3e50}));
+    const horn=new THREE.Mesh(new THREE.ConeGeometry(.35,1.2,10),new THREE.MeshPhongMaterial({color:0x000}));
     horn.position.set(s*1.6,2.2,0);
     horn.rotation.z=-s*.6;
     g.add(horn);
   }
 
-  const mth=new THREE.Mesh(new THREE.TorusGeometry(.6,.1,8,16,Math.PI),new THREE.MeshBasicMaterial({color:0x111}));
+  const mth=new THREE.Mesh(new THREE.TorusGeometry(.6,.1,8,16,Math.PI),new THREE.MeshBasicMaterial({color:0x000}));
   mth.position.set(0,.2,2.0);
   g.add(mth);
 
@@ -778,7 +968,7 @@ function lay(){
   }
 }
 
-function confetti(p, count=26){
+function confetti(p, count=28){
   for(let i=0;i<count;i++){
     const m=new THREE.Mesh(new THREE.BoxGeometry(.14,.14,.04),new THREE.MeshBasicMaterial({color:COL[i%7]}));
     m.position.copy(p);
@@ -789,21 +979,61 @@ function confetti(p, count=26){
   }
 }
 
-// ===== GAME STATE & FLOW =====
+// ===== MENU & SISTEM BADGE =====
+function renderBadges(){
+  const container = document.getElementById("badge-list");
+  container.innerHTML = "";
+  CATS.forEach(c => {
+    const isUnlocked = B[c.k] === true;
+    const badgeEl = document.createElement("div");
+    badgeEl.className = `badge-pill ${isUnlocked ? 'unlocked' : ''}`;
+    badgeEl.innerHTML = `<span>${isUnlocked ? '🏆' : '🔒'}</span> <span>${c.badge}</span>`;
+    container.appendChild(badgeEl);
+  });
+}
+
 function buildMenu(){
-  document.getElementById("hero").innerHTML=["A","B","C"].map((l,i)=>`<b style="background:${["#ff6b6b","#feca57","#1dd1a1"][i]};animation-delay:${i*.2}s">${l}</b>`).join("")+sh(ALLW).slice(0,9).map((x,i)=>`<span style="animation-delay:${i*.25}s">${x[1]}</span>`).join("");
+  document.getElementById("hero").innerHTML=["A","B","C"].map((l,i)=>`<b style="background:${["#e52521","#fbd000","#43b047"][i]};border:3px solid #000;animation-delay:${i*.2}s">${l}</b>`).join("")+sh(ALLW).slice(0,9).map((x,i)=>`<span style="animation-delay:${i*.25}s">${x[1]}</span>`).join("");
+  
+  const pInput = document.getElementById("player-input");
+  pInput.value = playerName;
+  pInput.onchange = (e) => {
+    playerName = e.target.value.trim() || "Wira";
+    sv();
+  };
+
+  renderBadges();
+  
   const d=document.getElementById("cats");
   d.innerHTML="";
   CATS.forEach(c=>{
-    const u=P[c.k]||1,e=document.createElement("div");
+    const u=P[c.k]||1;
+    const isCompleted = B[c.k] === true;
+    const e=document.createElement("div");
     e.className="cat";
     e.style.background=c.c;
-    e.innerHTML=`<div class="e">${c.e}</div><b>${c.n}</b><small>${c.d}</small><div class="lv"><button>◀</button><span class="f" style="font-size:17px">Tahap <i>${u}</i>/100</span><button>▶</button></div>`;
+    
+    e.innerHTML=`
+      <div class="cat-badge-tag" style="${isCompleted ? 'display:block' : ''}">🏆 SIAP</div>
+      <div class="e">${c.e}</div>
+      <b>${c.n}</b>
+      <small>${c.d}</small>
+      <div class="lv">
+        <button>◀</button>
+        <span class="f" style="font-size:16px;text-shadow:0 1px 0 #000">Tahap <i>${u}</i>/100</span>
+        <button>▶</button>
+      </div>
+    `;
+
     let sel=u;
     const [bl,br]=e.querySelectorAll("button"),lb=e.querySelector("i");
     bl.onclick=ev=>{ev.stopPropagation();sel=Math.max(1,sel-1);lb.textContent=sel};
     br.onclick=ev=>{ev.stopPropagation();sel=Math.min(P[c.k]||1,sel+1);lb.textContent=sel};
-    e.onclick=()=>start(c.k,sel);
+    e.onclick=()=>{
+      playerName = document.getElementById("player-input").value.trim() || "Wira";
+      sv();
+      start(c.k,sel);
+    };
     d.appendChild(e);
   });
 }
@@ -832,7 +1062,7 @@ function start(k,L){
   if(isBoss){
     bWrap.style.display="block";
     qBox.classList.add("boss-box");
-    toast("⚠️ TAHAP BOS! ⚠️");
+    toast(`⚠️ TAHAP BOS UNTUK ${playerName.toUpperCase()}! ⚠️`);
     bossWarnSound();
   } else {
     bWrap.style.display="none";
@@ -872,7 +1102,7 @@ function hud(){
     pl.textContent=`👑 BOS TAHAP ${G.L}`;
     pl.classList.add("pill-boss");
   } else {
-    pl.textContent=`${G.cat.e} Tahap ${G.L} · ${BK[G.k][uOf(G.k,G.L)].t}`;
+    pl.textContent=`${playerName} · ${G.cat.e} Tahap ${G.L}`;
     pl.classList.remove("pill-boss");
   }
   
@@ -888,7 +1118,7 @@ function hud(){
 function next(){
   clr();
   if(G.isBoss){
-    bossModel = mkBossMesh(G.L);
+    bossModel = mkBossMesh();
     S.add(bossModel);
   }
   
@@ -940,9 +1170,9 @@ function hit(m){
       toast("💥 PUKULAN BOS BERJAYA!");
     } else {
       good();
-      confetti(m.position, 25);
+      confetti(m.position, 28);
       avSay(["Bagus!","Pandai!","Hebat!","Yeay!"][Math.floor(Math.random()*4)]+" 🎉","jump");
-      toast(["Bagus! 🎉","Hebat! ⭐","Pandai! 👏","Yeay! 🥳"][Math.floor(Math.random()*4)]);
+      toast([`Bagus, ${playerName}! 🎉`,`Hebat! ⭐`,`Pandai! 👏`,`Yeay! 🥳`][Math.floor(Math.random()*4)]);
     }
 
     m.userData.pop=1;
@@ -985,23 +1215,27 @@ function finish(){
   
   const s=G.err==0?3:G.err<=2?2:1;
   P[G.k]=Math.max(P[G.k]||1,Math.min(100,G.L+1));
+
+  if(G.L>=100){
+    B[G.k]=true;
+  }
   sv();
   
   const r=document.getElementById("res");
   r.style.display="flex";
   
   if(G.isBoss){
-    document.getElementById("rt").textContent = `👑 BOS TAHAP ${G.L} TEWAS!`;
-    document.getElementById("rm").textContent = "Luar biasa! Raja Belon berjaya ditewaskan!";
+    document.getElementById("rt").textContent = `👑 TAHNIAH ${playerName.toUpperCase()}!`;
+    document.getElementById("rm").textContent = G.L>=100 ? "Lencana Kejuaraan Berjaya Diperoleh!" : "Raja Belon Berjaya Ditumpaskan!";
     confetti(new THREE.Vector3(0,0,2), 60);
   } else {
-    document.getElementById("rt").textContent=G.L>=100?"TAMAT! Anda Juara!":"Tahap "+G.L+" Selesai!";
-    document.getElementById("rm").textContent=s==3?"Sempurna! Terbaik!":"Bagus! Jom cuba lagi untuk 3 bintang!";
+    document.getElementById("rt").textContent=G.L>=100?`JUARA ${playerName.toUpperCase()}!`:`Tahap ${G.L} Selesai!`;
+    document.getElementById("rm").textContent=s==3?"Sempurna! 3 Bintang Diperoleh!":"Bagus! Jom cuba lagi untuk 3 bintang!";
   }
 
   document.getElementById("rs").textContent="⭐".repeat(s)+"☆".repeat(3-s);
   good();
-  say(G.isBoss ? "Tahniah! Anda telah kalahkan Bos!" : "Tahniah! Hebat!");
+  say(G.isBoss ? `Tahniah ${playerName}! Anda berjaya kalahkan bos!` : `Tahniah ${playerName}!`);
   G.stars=s;
 }
 
@@ -1010,7 +1244,7 @@ function nextLv(){
   start(G.k,G.L+1);
 }
 
-// ===== POINTER & RAYCAST INTERACTION =====
+// ===== INTERAKSI SENTUHAN & RAYCAST =====
 const rc=new THREE.Raycaster(),mv=new THREE.Vector2();
 function shoot(x,y){
   initAudio();
@@ -1024,8 +1258,8 @@ cv.addEventListener("pointerdown",e=>{
   shoot(e.clientX,e.clientY);
 },{passive:true});
 
-// ===== ROBUST MEDIAPIPE HAND TRACKING & FIST DETECTOR =====
-let hands=null, isProcessingFrame=false, cameraAnimId=null, isHitCooldown=false;
+// ===== PIP CAM & GESTUR PENGESANAN TANGAN =====
+let hands=null, cameraAnimId=null, isProcessingFrame=false, isHitCooldown=false;
 const handState = { fistFrames: 0, hasTriggered: false };
 
 function getDistance3D(p1, p2) {
@@ -1036,7 +1270,6 @@ function getDistance3D(p1, p2) {
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-// Ported Super Saufi 3D Knuckle Curl Detection:
 function isFistClenched(landmarks) {
   if (!landmarks || landmarks.length < 21) return false;
   const wrist = landmarks[0];
@@ -1044,10 +1277,10 @@ function isFistClenched(landmarks) {
   const palmScale = getDistance3D(mcpMiddle, wrist) || 0.15;
 
   const fingers = [
-    { mcp: 5, pip: 6, dip: 7, tip: 8 },    // Index
-    { mcp: 9, pip: 10, dip: 11, tip: 12 }, // Middle
-    { mcp: 13, pip: 14, dip: 15, tip: 16 },// Ring
-    { mcp: 17, pip: 18, dip: 19, tip: 20 } // Pinky
+    { mcp: 5, pip: 6, dip: 7, tip: 8 },
+    { mcp: 9, pip: 10, dip: 11, tip: 12 },
+    { mcp: 13, pip: 14, dip: 15, tip: 16 },
+    { mcp: 17, pip: 18, dip: 19, tip: 20 }
   ];
 
   let curledCount = 0;
@@ -1077,14 +1310,17 @@ function isFistClenched(landmarks) {
 async function startCam(){
   initAudio();
   const camBtn=document.getElementById("camBtn");
+  const pipBox=document.getElementById("cam-pip");
+  const video=document.getElementById("cam-pip-video");
+
   if(typeof window.Hands === 'undefined'){
-    toast("MediaPipe sedang dimuatkan, sila tunggu sebentar...");
+    toast("MediaPipe sedang dimuatkan, sila tunggu...");
     return;
   }
 
   try{
     camBtn.textContent="Memulakan Kamera...";
-    
+
     hands = new Hands({
       locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
     });
@@ -1098,30 +1334,31 @@ async function startCam(){
 
     hands.onResults(onHandResults);
 
-    const video = document.getElementById('v');
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+      video: { width: { ideal: 480 }, height: { ideal: 360 }, facingMode: "user" },
       audio: false
     });
-    
+
     video.srcObject = stream;
     await video.play();
 
-    camBtn.style.background="#2ed573";
-    camBtn.textContent="✅ Kamera Tangan Aktif";
-    toast("Kamera aktif! Tunjukkan tangan.");
+    pipBox.style.display = "block";
+    camBtn.className = "btn-mario btn-yellow";
+    camBtn.textContent="✅ Kamera Aktif (Window Dibuka)";
+    toast("Kamera berjaya dihidupkan!");
 
     startVideoLoop();
   }catch(err){
-    console.error("Camera Init Error:", err);
+    console.error("Camera Error:", err);
     toast("Kamera gagal diakses.");
-    camBtn.textContent="✊ Guna Kamera Tangan (Cuba Lagi)";
+    camBtn.className = "btn-mario btn-red";
+    camBtn.textContent="✊ Cuba Buka Kamera Semula";
   }
 }
 
 function startVideoLoop(){
   if(cameraAnimId) cancelAnimationFrame(cameraAnimId);
-  const video = document.getElementById('v');
+  const video = document.getElementById('cam-pip-video');
 
   async function processVideoFrame(){
     if (video.readyState >= 2 && hands && !isProcessingFrame) {
@@ -1129,7 +1366,7 @@ function startVideoLoop(){
       try {
         await hands.send({ image: video });
       } catch (e) {
-        console.warn("Hands frame send error:", e);
+        console.warn("Frame dispatch warning:", e);
       } finally {
         isProcessingFrame = false;
       }
@@ -1143,11 +1380,13 @@ function onHandResults(results){
   const curEl = document.getElementById('cur');
   const ring = document.getElementById('cur-ring');
   const lbl = document.getElementById('cur-lbl');
+  const pipStatus = document.getElementById('pip-status');
 
   if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
     curEl.style.display = 'none';
     handState.fistFrames = 0;
     handState.hasTriggered = false;
+    if(pipStatus) pipStatus.textContent = "TIADA TANGAN";
     return;
   }
 
@@ -1162,7 +1401,6 @@ function onHandResults(results){
 
   const isFistConfirmed = handState.fistFrames >= 2;
 
-  // Mirror X coordinate for intuitive selfie tracking
   const screenX = (1 - landmarks[9].x) * window.innerWidth;
   const screenY = landmarks[9].y * window.innerHeight;
 
@@ -1174,6 +1412,7 @@ function onHandResults(results){
     ring.className = 'glove-ring clench';
     ring.textContent = '✊';
     lbl.textContent = 'GENGGAM! ✊';
+    if(pipStatus) pipStatus.textContent = "GENGGAM ✊";
 
     if (!handState.hasTriggered && !isHitCooldown) {
       handState.hasTriggered = true;
@@ -1186,10 +1425,11 @@ function onHandResults(results){
     ring.className = 'glove-ring';
     ring.textContent = '🖐️';
     lbl.textContent = 'HALA ✋';
+    if(pipStatus) pipStatus.textContent = "MENGHALA ✋";
   }
 }
 
-// ===== RENDER LOOP =====
+// ===== RENDER 3D LOOP =====
 const ck=new THREE.Clock();
 (function loop(){
   requestAnimationFrame(loop);
@@ -1231,7 +1471,7 @@ const ck=new THREE.Clock();
   sun.rotation.y=t;
   clouds.forEach(c=>{
     c.position.x+=dt*.3;
-    if(c.position.x>16)c.position.x=-16;
+    if(c.position.x>17)c.position.x=-17;
   });
 
   for(let i=fx.length-1;i>=0;i--){
@@ -1249,7 +1489,7 @@ const ck=new THREE.Clock();
   R.render(S,cam);
 })();
 
-// Avatar binding with fallback proxy
+// Sandaran gambar logo
 document.querySelectorAll(".avimg").forEach(i=>{
   i.src=AV_URL;
   i.onerror=()=>{
