@@ -20,7 +20,7 @@
 <!-- Three.js (r128) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- MediaPipe Hands & Camera Utils CDN (Versi Stabil Cross-Browser) -->
+<!-- MediaPipe Hands & Camera Utils CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
@@ -38,33 +38,21 @@ html,body{
 
 .f{font-family:'Lilita One',cursive;letter-spacing:1px}
 
-/* Gaya Teks Arcade Kartun */
+/* Tipografi Mario Kartun */
 .stroke-mario{
   text-shadow:
     -4px -4px 0 #000, 4px -4px 0 #000,
     -4px 4px 0 #000, 4px 4px 0 #000,
-    0 8px 0 rgba(0,0,0,0.8);
+    0 8px 0 rgba(0,0,0,0.85);
 }
 .stroke-sm{
   text-shadow:
-    -3px -3px 0 #000, 3px -3px 0 #000,
-    -3px 3px 0 #000, 3px 3px 0 #000,
+    -2px -2px 0 #000, 2px -2px 0 #000,
+    -2px 2px 0 #000, 2px 2px 0 #000,
     0 4px 0 rgba(0,0,0,0.6);
 }
 
-/* Video Kamera Off-Screen */
-#webcam-video{
-  position:fixed;
-  top:0;
-  left:0;
-  width:1px;
-  height:1px;
-  opacity:0.01;
-  pointer-events:none;
-  z-index:-1;
-}
-
-/* Kanvas Utama 3D */
+/* Kanvas Utama Three.js */
 canvas#three-canvas{
   position:fixed;
   inset:0;
@@ -74,7 +62,7 @@ canvas#three-canvas{
   z-index:1;
 }
 
-/* Kursor Penumbuk Gestur Ekstra Besar */
+/* Kursor Gestur Tangan */
 #glove-cursor{
   position:fixed;
   transform:translate(-50%,-50%);
@@ -84,37 +72,85 @@ canvas#three-canvas{
   transition:transform 0.05s ease-out;
 }
 .glove-ring{
-  width:100px;
-  height:100px;
+  width:95px;
+  height:95px;
   border-radius:50%;
-  border:6px solid #000;
+  border:5px solid #000;
   background:rgba(251, 208, 0, 0.95);
-  box-shadow:0 8px 0 #000, 0 0 35px rgba(251, 208, 0, 0.95);
+  box-shadow:0 8px 0 #000, 0 0 35px rgba(251, 208, 0, 0.9);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:52px;
+  font-size:50px;
   transition:all 0.12s ease;
 }
 .glove-ring.clenched{
   background:#e52521;
-  transform:scale(1.35);
-  box-shadow:0 8px 0 #000, 0 0 50px rgba(229, 37, 33, 1);
+  transform:scale(1.3);
+  box-shadow:0 8px 0 #000, 0 0 45px rgba(229, 37, 33, 1);
 }
 .glove-label{
   position:absolute;
-  bottom:-36px;
+  bottom:-32px;
   left:50%;
   transform:translateX(-50%);
   background:#fff;
   border:4px solid #000;
   color:#000;
   font-family:'Lilita One', cursive;
-  font-size:18px;
-  padding:4px 16px;
-  border-radius:20px;
+  font-size:16px;
+  padding:3px 14px;
+  border-radius:18px;
   white-space:nowrap;
-  box-shadow:0 5px 0 #000;
+  box-shadow:0 4px 0 #000;
+}
+
+/* Tingkap Pratonton Kamera (Live Preview Window) */
+#cam-preview-box{
+  position:fixed;
+  bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+  right:calc(12px + env(safe-area-inset-right, 0px));
+  width:clamp(140px, 20vw, 200px);
+  aspect-ratio:4/3;
+  background:#1e272e;
+  border:4px solid #000;
+  border-radius:22px;
+  box-shadow:0 8px 0 #000, 0 10px 20px rgba(0,0,0,0.5);
+  overflow:hidden;
+  z-index:75;
+}
+#cam-preview-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1);
+}
+#cam-preview-bar{
+  position:absolute;
+  top:6px;
+  left:6px;
+  right:6px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  pointer-events:none;
+}
+.cam-indicator{
+  background:rgba(0,0,0,0.75);
+  color:#fff;
+  font-size:10px;
+  font-weight:900;
+  padding:2px 8px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.cam-led{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#fbd000;
 }
 
 /* Kesan Letupan Tumbukan */
@@ -171,7 +207,6 @@ canvas#three-canvas{
 }
 .hud-pill.danger{background:#e52521;color:#fff}
 
-/* Banner Soalan Semasa Bersaiz Gergasi */
 #question-banner{
   background:#fff;
   border:6px solid #000;
@@ -221,7 +256,7 @@ canvas#three-canvas{
 .btn-green{ background:#43b047; box-shadow:0 8px 0 #1b661e; }
 .btn-yellow{ background:#fbd000; color:#000; box-shadow:0 8px 0 #b39200; }
 
-/* Skrin Menu Utama (Homepage) */
+/* Menu Utama */
 #menu-screen, #res-screen{
   position:fixed;
   inset:0;
@@ -239,28 +274,53 @@ canvas#three-canvas{
 }
 #res-screen{display:none;justify-content:center}
 
+/* Lencana Avatar Profesional Cikgu AVA */
 .header-brand{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:16px;
+  gap:18px;
   margin-top:6px;
   flex-wrap:wrap;
 }
 
-.ava-logo-natural{
-  width:clamp(115px, 28vw, 170px);
-  height:auto;
-  max-height:220px;
-  object-fit:contain;
-  border:none !important;
-  background:transparent !important;
-  filter:drop-shadow(0 10px 16px rgba(0,0,0,0.4));
-  animation:avaFloat 2.6s ease-in-out infinite;
+.ava-badge-card{
+  width:clamp(110px, 24vw, 155px);
+  aspect-ratio:3/4;
+  background:linear-gradient(145deg, #ffffff, #ffeaa7);
+  border:5px solid #000;
+  border-radius:30px 30px 42px 42px;
+  box-shadow:0 10px 0 #000, 0 14px 25px rgba(0,0,0,0.4);
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  animation:badgeFloat 2.6s ease-in-out infinite;
 }
-@keyframes avaFloat{
+@keyframes badgeFloat{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-8px)}
+}
+
+.ava-badge-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:24px 24px 36px 36px;
+}
+.ava-badge-tag{
+  position:absolute;
+  bottom:-12px;
+  background:#fbd000;
+  color:#000;
+  font-family:'Lilita One', cursive;
+  font-size:12px;
+  padding:2px 10px;
+  border:3px solid #000;
+  border-radius:14px;
+  box-shadow:0 3px 0 #000;
 }
 
 .brand-text{
@@ -294,24 +354,13 @@ canvas#three-canvas{
 }
 #player-input:focus{background:#fff;border-color:#e52521}
 
-#cam-status-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:#fff;
-  border:3px solid #000;
-  border-radius:18px;
-  padding:5px 16px;
-  font-size:14px;
-  font-weight:900;
-  color:#000;
-  box-shadow:0 4px 0 #000;
-}
-#cam-status-dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:#fbd000;
+/* Bahagian Grid 6 Kategori */
+.category-section-title{
+  font-family:'Lilita One', cursive;
+  font-size:clamp(18px, 4.5vw, 24px);
+  color:#fbd000;
+  text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, 0 4px 0 #000;
+  margin-top:4px;
 }
 
 #cat-grid{
@@ -319,7 +368,7 @@ canvas#three-canvas{
   grid-template-columns:repeat(auto-fit, minmax(145px, 1fr));
   gap:12px;
   width:100%;
-  max-width:940px;
+  max-width:960px;
 }
 .cat-card{
   border-radius:24px;
@@ -329,10 +378,11 @@ canvas#three-canvas{
   cursor:pointer;
   border:4px solid #000;
   transition:transform 0.15s ease;
+  position:relative;
 }
 .cat-card:hover{transform:scale(1.04)}
-.cat-card .icon{font-size:clamp(34px, 8vw, 46px);filter:drop-shadow(0 4px 0 #000)}
-.cat-card .title{font-family:'Lilita One', cursive;font-size:clamp(16px, 4.4vw, 21px);margin:6px 0 3px;text-shadow:0 2px 0 #000}
+.cat-card .icon{font-size:clamp(32px, 8vw, 44px);filter:drop-shadow(0 4px 0 #000)}
+.cat-card .title{font-family:'Lilita One', cursive;font-size:clamp(16px, 4.2vw, 20px);margin:6px 0 3px;text-shadow:0 2px 0 #000}
 .cat-card .desc{font-size:clamp(11px, 2.9vw, 13px);font-weight:800;line-height:1.2;opacity:0.95}
 
 #toast-box{
@@ -341,7 +391,7 @@ canvas#three-canvas{
   bottom:10%;
   transform:translateX(-50%);
   font-family:'Lilita One', cursive;
-  font-size:clamp(26px, 7.5vw, 50px);
+  font-size:clamp(26px, 7.5vw, 48px);
   color:#fff;
   pointer-events:none;
   opacity:0;
@@ -353,8 +403,16 @@ canvas#three-canvas{
 </head>
 <body>
 
-<!-- Video Webcam Background -->
-<video id="webcam-video" playsinline muted autoplay></video>
+<!-- Tingkap Pratonton Kamera Langsung (Picture-in-Picture) -->
+<div id="cam-preview-box">
+  <video id="cam-preview-video" playsinline muted autoplay></video>
+  <div id="cam-preview-bar">
+    <div class="cam-indicator">
+      <span class="cam-led" id="cam-led-dot"></span>
+      <span id="cam-preview-status">MEMULAKAN</span>
+    </div>
+  </div>
+</div>
 
 <!-- Kanvas 3D Three.js Penuh -->
 <canvas id="three-canvas"></canvas>
@@ -365,7 +423,7 @@ canvas#three-canvas{
   <div class="glove-label" id="glove-status">HALA ✋</div>
 </div>
 
-<!-- HUD Permainan -->
+<!-- HUD Semasa Bermain -->
 <div id="game-hud">
   <div id="hud-bar">
     <button class="btn-mario btn-red" style="padding:6px 16px;font-size:16px" onclick="backToMenu()">
@@ -385,50 +443,53 @@ canvas#three-canvas{
 
 <div id="toast-box" class="stroke-mario"></div>
 
-<!-- SKRIN MENU UTAMA -->
+<!-- SKRIN MENU UTAMA (HOMEPAGE) -->
 <div id="menu-screen">
   <div class="header-brand">
-    <img src="https://i.imgur.com/Lsnjybg.png" class="ava-logo-natural" alt="Cikgu AVA">
+    <div class="ava-badge-card">
+      <img src="https://i.imgur.com/Lsnjybg.png" alt="Cikgu AVA">
+      <span class="ava-badge-tag">CIKGU AVA</span>
+    </div>
+
     <div class="brand-text">
       <h1 class="f stroke-mario" style="color:#fbd000;font-size:clamp(40px, 11vw, 76px);line-height:1">AVA</h1>
       <h2 class="f stroke-mario" style="color:#fff;font-size:clamp(22px, 6vw, 40px);line-height:1.1">JOM BACA!</h2>
       <span class="f stroke-sm" style="color:#fbd000;font-size:clamp(13px, 3.5vw, 17px);margin-top:2px">
-        BERSAMA CIKGU AVA ⭐ 3D GESTURE CLENCH ARCADE
+        EDISI INTERAKTIF GESTUR TANGAN ✊
       </span>
     </div>
   </div>
 
-  <div id="cam-status-pill">
-    <span id="cam-status-dot"></span>
-    <span id="cam-status-text">Memeriksa kamera & MediaPipe...</span>
-  </div>
-
   <!-- Nama Pemain -->
   <div id="player-box">
-    <label class="f" style="color:#000;font-size:18px">NAMA WIRA BACAAN:</label>
+    <label class="f" style="color:#000;font-size:17px">NAMA WIRA BACAAN:</label>
     <input type="text" id="player-input" placeholder="Nama Anda (cth: Saufi)" maxlength="18">
     <span style="font-size:12px;font-weight:900;color:#636e72">Buka tapak tangan ✋ untuk membidik, genggam penumbuk ✊ untuk menumbuk raksasa!</span>
   </div>
 
+  <!-- Bahagian Kategori Mengikut Sukatan -->
+  <div class="category-section-title">PILIH KATEGORI PEMBELAJARAN:</div>
   <div id="cat-grid"></div>
 
-  <button class="btn-mario btn-green" style="font-size:clamp(20px, 5.2vw, 28px);padding:14px 40px" onclick="startGameDirectly()">
-    <i class="fa-solid fa-play"></i> MULA BERMAIN DENGAN AVA!
+  <button class="btn-mario btn-green" style="font-size:clamp(19px, 5.2vw, 27px);padding:14px 38px" onclick="startGameDirectly()">
+    <i class="fa-solid fa-play"></i> MULA BERMAIN!
   </button>
 
   <div class="f stroke-sm" style="color:#fff;font-size:clamp(13px, 3.4vw, 16px);padding-bottom:14px">
-    Berdiri 1 - 2 meter di hadapan kamera agar kedua-dua tangan kelihatan jelas di skrin! 🍄
+    Periksa kotak kamera di sudut bawah: pastikan tangan anda dapat dikesan di hadapan webcam! 🍄
   </div>
 </div>
 
 <!-- SKRIN TAMAT (RESULT) -->
 <div id="res-screen">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
-    <img src="https://i.imgur.com/Lsnjybg.png" style="width:90px;height:auto;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.5));" alt="AVA">
+    <div class="ava-badge-card" style="width:75px;">
+      <img src="https://i.imgur.com/Lsnjybg.png" alt="AVA">
+    </div>
     <h1 id="res-title" class="f stroke-mario" style="color:#fbd000;font-size:clamp(40px, 11vw, 76px);margin:0">TAHNIAH!</h1>
   </div>
   <div id="res-stars" style="font-size:clamp(55px, 16vw, 85px);margin:6px 0">⭐⭐⭐</div>
-  <div class="f stroke-sm" id="res-msg" style="font-size:clamp(20px, 5.5vw, 28px);color:#fff;margin-bottom:18px;max-width:90vw"></div>
+  <div class="f stroke-sm" id="res-msg" style="font-size:clamp(19px, 5.2vw, 27px);color:#fff;margin-bottom:18px;max-width:90vw"></div>
   <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
     <button class="btn-mario btn-green" onclick="restartCurrentCategory()">MAIN LAGI 🔄</button>
     <button class="btn-mario btn-yellow" onclick="backToMenu()">MENU UTAMA 🏠</button>
@@ -436,7 +497,7 @@ canvas#three-canvas{
 </div>
 
 <script>
-// ===== 1. KURIKULUM 6 KATEGORI =====
+// ===== 1. KURIKULUM 6 KATEGORI MENGIKUT SUKATAN =====
 const CURRICULUM = {
   huruf: {
     name: "Latih tubi bunyi huruf",
@@ -565,632 +626,4 @@ function beep(freq, duration, type="sine", startDelay=0) {
   } catch(e){}
 }
 
-const sfxCorrect = () => [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, "triangle", i * 0.08));
-const sfxWrong = () => { beep(200, 0.25, "sawtooth"); beep(140, 0.3, "sawtooth", 0.12); };
-const sfxPunch = () => { beep(120, 0.15, "square"); beep(60, 0.2, "sine", 0.05); };
-
-function say(text) {
-  if (!text || !window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "ms-MY";
-  utter.rate = 0.8;
-  utter.pitch = 1.25;
-  speechSynthesis.speak(utter);
-}
-
-function replayAudio() {
-  if (gameState.currentQuestion && gameState.currentQuestion.sound) {
-    say(gameState.currentQuestion.sound);
-  }
-}
-
-// ===== 4. SETUP THREE.JS 3D WORLD (SKALA BESAR GERGASI) =====
-const threeCanvas = document.getElementById("three-canvas");
-const videoEl = document.getElementById("webcam-video");
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 0, 14);
-
-const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, alpha: true, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-// Pencahayaan
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-scene.add(hemiLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-dirLight.position.set(5, 12, 10);
-scene.add(dirLight);
-
-// Skrin Video Webcam 3D Sebagai Latar Belakang Cermin
-const videoTexture = new THREE.VideoTexture(videoEl);
-videoTexture.minFilter = THREE.LinearFilter;
-videoTexture.magFilter = THREE.LinearFilter;
-videoTexture.format = THREE.RGBAFormat;
-
-const bgGeometry = new THREE.PlaneGeometry(36, 22);
-const bgMaterial = new THREE.MeshBasicMaterial({ map: videoTexture, depthWrite: false });
-const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
-bgMesh.position.set(0, 0, -2);
-bgMesh.scale.x = -1; // Cermin (Mirror View)
-scene.add(bgMesh);
-
-// Lapisan Gelap Ceria untuk memudahkan bacaan
-const overlayGeo = new THREE.PlaneGeometry(38, 24);
-const overlayMat = new THREE.MeshBasicMaterial({ color: 0x0a192f, transparent: true, opacity: 0.38, depthWrite: false });
-const overlayMesh = new THREE.Mesh(overlayGeo, overlayMat);
-overlayMesh.position.set(0, 0, -1.9);
-scene.add(overlayMesh);
-
-// Maskot AVA 3D di sisi kiri bawah
-let avaMesh3D = null;
-const textureLoader = new THREE.TextureLoader();
-textureLoader.load("https://i.imgur.com/Lsnjybg.png", (tex) => {
-  const avaGeo = new THREE.PlaneGeometry(4.2, 5.6);
-  const avaMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-  avaMesh3D = new THREE.Mesh(avaGeo, avaMat);
-  avaMesh3D.position.set(-6.8, -3.2, 2);
-  scene.add(avaMesh3D);
-});
-
-// Penjana Tekstur Teks 3D Bersaiz Ekstra Besar
-function createWordTexture(text) {
-  const c = document.createElement("canvas");
-  c.width = 1024;
-  c.height = 360;
-  const ctx2 = c.getContext("2d");
-
-  // Kad Putih Bersudut
-  ctx2.fillStyle = "#ffffff";
-  if (ctx2.roundRect) ctx2.roundRect(16, 16, 992, 328, 48);
-  else ctx2.rect(16, 16, 992, 328);
-  ctx2.fill();
-
-  // Border Hitam Tebal
-  ctx2.lineWidth = 24;
-  ctx2.strokeStyle = "#000000";
-  ctx2.stroke();
-
-  // Teks Perkataan Gergasi
-  ctx2.fillStyle = "#1e293b";
-  ctx2.textAlign = "center";
-  ctx2.textBaseline = "middle";
-  const fontSize = Math.min(180, Math.floor((900 * 2.2) / Math.max(text.length, 3.2)));
-  ctx2.font = `900 ${fontSize}px 'Lilita One', sans-serif`;
-  ctx2.fillText(text, 512, 185);
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.needsUpdate = true;
-  return tex;
-}
-
-// Binaan Raksasa 3D Comel Berskala Gergasi
-function create3DMonster(text, colorHex, index) {
-  const group = new THREE.Group();
-
-  // Badan Raksasa (Sfera Besar)
-  const bodyGeo = new THREE.SphereGeometry(1.85, 32, 24);
-  const bodyMat = new THREE.MeshPhongMaterial({ color: colorHex, shininess: 80 });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  body.scale.set(1.1, 1.25, 1.0);
-  group.add(body);
-
-  // Mata Raksasa Kartun
-  [-0.65, 0.65].forEach(x => {
-    const eyeGeo = new THREE.SphereGeometry(0.38, 16, 16);
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const eye = new THREE.Mesh(eyeGeo, eyeMat);
-    eye.position.set(x, 0.7, 1.6);
-    group.add(eye);
-
-    const pupilGeo = new THREE.SphereGeometry(0.18, 12, 12);
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const pupil = new THREE.Mesh(pupilGeo, pupilMat);
-    pupil.position.set(x, 0.7, 1.9);
-    group.add(pupil);
-  });
-
-  // Tanduk Raksasa
-  [-0.9, 0.9].forEach((x, i) => {
-    const hornGeo = new THREE.ConeGeometry(0.35, 1.1, 12);
-    const hornMat = new THREE.MeshPhongMaterial({ color: 0xfbd000 });
-    const horn = new THREE.Mesh(hornGeo, hornMat);
-    horn.position.set(x, 2.1, 0);
-    horn.rotation.z = i === 0 ? 0.35 : -0.35;
-    group.add(horn);
-  });
-
-  // Kad Perkataan 3D di hadapan dada raksasa (Ekstra Besar & Jelas)
-  const placardGeo = new THREE.PlaneGeometry(5.2, 1.85);
-  const placardMat = new THREE.MeshBasicMaterial({ map: createWordTexture(text), transparent: true });
-  const placard = new THREE.Mesh(placardGeo, placardMat);
-  placard.position.set(0, -1.2, 2.0);
-  group.add(placard);
-
-  group.userData = {
-    index: index,
-    text: text,
-    baseY: 0,
-    isKnocked: false,
-    placardMesh: placard
-  };
-
-  return group;
-}
-
-function resizeRenderer() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-window.addEventListener("resize", resizeRenderer);
-
-// ===== 5. MEDIAPIPE HANDS DETECTOR (STABIL & RESPOMSIF) =====
-function getDistance3D(p1, p2) {
-  if (!p1 || !p2) return 0;
-  const dx = p1.x - p2.x;
-  const dy = p1.y - p2.y;
-  const dz = ((p1.z || 0) - (p2.z || 0)) * 1.1;
-  return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
-
-// Algoritma Pengesanan Penumbuk Genggam Berasaskan Jarak Knuckle
-function isFistClenched(landmarks) {
-  if (!landmarks || landmarks.length < 21) return false;
-  const wrist = landmarks[0];
-  const mcpMiddle = landmarks[9];
-  const palmScale = getDistance3D(mcpMiddle, wrist) || 0.15;
-
-  const fingers = [
-    { mcp: 5, tip: 8 },   // Telunjuk
-    { mcp: 9, tip: 12 },  // Hantu
-    { mcp: 13, tip: 16 }, // Manis
-    { mcp: 17, tip: 20 }  // Kelingking
-  ];
-
-  let curledCount = 0;
-  let extendedCount = 0;
-
-  for (let f of fingers) {
-    const dTipMcp = getDistance3D(landmarks[f.tip], landmarks[f.mcp]);
-    const dTipWrist = getDistance3D(landmarks[f.tip], wrist);
-
-    if (dTipWrist > palmScale * 1.12 && dTipMcp > palmScale * 0.65) extendedCount++;
-    if (dTipMcp < palmScale * 0.72 || dTipWrist < palmScale * 1.10) curledCount++;
-  }
-
-  // Jika mana-mana jari lurus terbuka = Mode BIDIK ✋
-  if (extendedCount >= 1) return false;
-  // Jika sekurang-kurangnya 3 jari melipat ke tapak tangan = GENGGAM ✊
-  return (curledCount >= 3);
-}
-
-async function initHandsAndCamera() {
-  const statusDot = document.getElementById("cam-status-dot");
-  const statusText = document.getElementById("cam-status-text");
-
-  try {
-    statusDot.style.background = "#fbd000";
-    statusText.textContent = "Menyambung kamera & model...";
-
-    gameState.handsDetector = new Hands({
-      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
-
-    gameState.handsDetector.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 0,
-      minDetectionConfidence: 0.40,
-      minTrackingConfidence: 0.40
-    });
-
-    gameState.handsDetector.onResults(onHandResults);
-
-    // Gunakan MediaPipe Camera Utils rasmi
-    gameState.cameraInstance = new Camera(videoEl, {
-      onFrame: async () => {
-        if (gameState.handsDetector && videoEl.readyState >= 2) {
-          await gameState.handsDetector.send({ image: videoEl });
-        }
-      },
-      width: 640,
-      height: 480
-    });
-
-    await gameState.cameraInstance.start();
-
-    statusDot.style.background = "#43b047";
-    statusText.textContent = "Kamera & MediaPipe Sedia! ✅";
-    gameState.isCameraActive = true;
-  } catch (err) {
-    console.warn("Ralat permulaan kamera:", err);
-    statusDot.style.background = "#e52521";
-    statusText.textContent = "Sila tekan 'Allow' untuk membenarkan kamera.";
-    toast("Akses kamera diperlukan untuk kawalan gestur!");
-  }
-}
-
-// Raycaster untuk pemilihan 3D
-const raycaster = new THREE.Raycaster();
-const mouseVec = new THREE.Vector2();
-
-function onHandResults(results) {
-  const cursorEl = document.getElementById("glove-cursor");
-  const gloveRing = document.getElementById("glove-icon");
-  const gloveStatus = document.getElementById("glove-status");
-
-  // Jika di menu utama, jangan paparkan sarung tangan
-  if (document.getElementById("menu-screen").style.display !== "none") {
-    cursorEl.style.display = "none";
-    return;
-  }
-
-  if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-    cursorEl.style.display = "none";
-    gameState.fistHoldFrames = 0;
-    gameState.hoveredMonsterIndex = null;
-    return;
-  }
-
-  const landmarks = results.multiHandLandmarks[0];
-  const isFist = isFistClenched(landmarks);
-
-  if (isFist) {
-    gameState.fistHoldFrames++;
-  } else {
-    gameState.fistHoldFrames = 0;
-  }
-
-  const isConfirmedFist = gameState.fistHoldFrames >= 2;
-
-  // Koordinat Cermin (Selfie View)
-  const screenX = (1 - landmarks[9].x) * window.innerWidth;
-  const screenY = landmarks[9].y * window.innerHeight;
-
-  cursorEl.style.display = "block";
-  cursorEl.style.left = `${screenX}px`;
-  cursorEl.style.top = `${screenY}px`;
-
-  // Padankan kursor dengan objek 3D di skrin
-  mouseVec.x = (screenX / window.innerWidth) * 2 - 1;
-  mouseVec.y = -(screenY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouseVec, camera);
-  const intersects = raycaster.intersectObjects(scene.children, true);
-
-  let targetMonster = null;
-  for (let hit of intersects) {
-    let p = hit.object;
-    while (p) {
-      if (p.userData && p.userData.index !== undefined && !p.userData.isKnocked) {
-        targetMonster = p;
-        break;
-      }
-      p = p.parent;
-    }
-    if (targetMonster) break;
-  }
-
-  if (targetMonster) {
-    gameState.hoveredMonsterIndex = targetMonster.userData.index;
-  } else {
-    gameState.hoveredMonsterIndex = null;
-  }
-
-  if (isConfirmedFist) {
-    gloveRing.className = "glove-ring clenched";
-    gloveRing.textContent = "✊";
-    gloveStatus.textContent = "GENGGAM! ✊";
-
-    // Pukul raksasa sekiranya pemain baru menggenggam
-    if (!gameState.lastFistState && gameState.hoveredMonsterIndex !== null) {
-      clenchAndPunchMonster(gameState.hoveredMonsterIndex, screenX, screenY);
-    }
-    gameState.lastFistState = true;
-  } else {
-    gameState.lastFistState = false;
-    gloveRing.className = "glove-ring";
-    gloveRing.textContent = "🖐️";
-    gloveStatus.textContent = "HALA ✋";
-  }
-}
-
-// ===== 6. INTERAKSI TUMBUKAN =====
-function createHitEffect(x, y, text="POW! 💥") {
-  const pow = document.createElement("div");
-  pow.className = "hit-effect stroke-mario";
-  pow.style.left = `${x}px`;
-  pow.style.top = `${y}px`;
-  pow.textContent = text;
-  document.body.appendChild(pow);
-  setTimeout(() => pow.remove(), 550);
-}
-
-function clenchAndPunchMonster(index, hitX, hitY) {
-  if (gameState.isLocked) return;
-  const m3D = gameState.monsters3D[index];
-  if (!m3D) return;
-
-  const isCorrect = (index === gameState.currentQuestion.a);
-  sfxPunch();
-
-  if (isCorrect) {
-    gameState.isLocked = true;
-    sfxCorrect();
-    createHitEffect(hitX, hitY, "TUMBUK! 💥");
-
-    m3D.userData.isKnocked = true;
-    gameState.score += 100;
-    updateHUD();
-    toast("🎉 TAHNIAH! JAWAPAN TEPAT!");
-
-    setTimeout(() => {
-      gameState.roundIndex++;
-      const cat = CURRICULUM[gameState.currentCategoryKey];
-      if (gameState.roundIndex >= cat.questions.length) {
-        showResultScreen(true);
-      } else {
-        loadQuestion();
-      }
-    }, 1200);
-
-  } else {
-    sfxWrong();
-    createHitEffect(hitX, hitY, "MISSED! ❌");
-    gameState.lives--;
-    updateHUD();
-    toast("💪 CUBA LAGI!");
-
-    // Kesan gegar raksasa salah
-    m3D.position.x += 0.3;
-    setTimeout(() => { m3D.position.x -= 0.3; }, 150);
-
-    if (gameState.lives <= 0) {
-      gameState.isLocked = true;
-      showResultScreen(false);
-    }
-  }
-}
-
-// Sentuhan terus pada skrin (Click / Tap Fallback)
-threeCanvas.addEventListener("pointerdown", (e) => {
-  mouseVec.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseVec.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouseVec, camera);
-
-  const intersects = raycaster.intersectObjects(scene.children, true);
-  for (let hit of intersects) {
-    let p = hit.object;
-    while (p) {
-      if (p.userData && p.userData.index !== undefined && !p.userData.isKnocked) {
-        clenchAndPunchMonster(p.userData.index, e.clientX, e.clientY);
-        return;
-      }
-      p = p.parent;
-    }
-  }
-});
-
-// ===== 7. ALIRAN PERMAINAN =====
-function buildCategoryMenu() {
-  const grid = document.getElementById("cat-grid");
-  grid.innerHTML = "";
-
-  Object.keys(CURRICULUM).forEach(key => {
-    const cat = CURRICULUM[key];
-    const card = document.createElement("div");
-    card.className = "cat-card";
-    card.style.background = cat.color;
-    card.innerHTML = `
-      <div class="icon">${cat.icon}</div>
-      <div class="title">${cat.name}</div>
-      <div class="desc">${cat.desc}</div>
-    `;
-    card.onclick = () => {
-      gameState.currentCategoryKey = key;
-      startGameDirectly();
-    };
-    grid.appendChild(card);
-  });
-}
-
-function startGameDirectly() {
-  const pInput = document.getElementById("player-input").value.trim();
-  if (pInput) {
-    gameState.playerName = pInput;
-    localStorage.ava_player = pInput;
-  }
-
-  if (!gameState.isCameraActive) {
-    initHandsAndCamera();
-  }
-
-  document.getElementById("menu-screen").style.display = "none";
-  document.getElementById("res-screen").style.display = "none";
-  document.getElementById("game-hud").style.display = "flex";
-
-  gameState.score = 0;
-  gameState.lives = 3;
-  gameState.roundIndex = 0;
-  loadQuestion();
-}
-
-function clear3DMonsters() {
-  gameState.monsters3D.forEach(m => scene.remove(m));
-  gameState.monsters3D = [];
-}
-
-function loadQuestion() {
-  gameState.isLocked = false;
-  clear3DMonsters();
-
-  const cat = CURRICULUM[gameState.currentCategoryKey];
-  const q = cat.questions[gameState.roundIndex];
-  gameState.currentQuestion = q;
-
-  document.getElementById("hud-cat").textContent = `${cat.icon} ${cat.name.toUpperCase()}`;
-  document.getElementById("question-target").textContent = q.target;
-
-  const total = q.options.length;
-  // Pengiraan kedudukan mendatar raksasa 3D berskala luas
-  const spacing = 5.8;
-
-  q.options.forEach((optText, idx) => {
-    const colorHex = MONSTER_COLORS[idx % MONSTER_COLORS.length];
-    const m3D = create3DMonster(optText, colorHex, idx);
-
-    const posX = (idx - (total - 1) / 2) * spacing;
-    m3D.position.set(posX, -0.6, 1.5);
-    m3D.userData.baseY = -0.6;
-
-    scene.add(m3D);
-    gameState.monsters3D.push(m3D);
-  });
-
-  resetTimer();
-  updateHUD();
-
-  setTimeout(() => {
-    say(q.sound);
-  }, 400);
-}
-
-function resetTimer() {
-  clearInterval(gameState.timerInterval);
-  gameState.timerSec = 15;
-  document.getElementById("hud-timer").textContent = `⏱️ ${gameState.timerSec}s`;
-  document.getElementById("hud-timer").classList.remove("danger");
-
-  gameState.timerInterval = setInterval(() => {
-    gameState.timerSec--;
-    document.getElementById("hud-timer").textContent = `⏱️ ${gameState.timerSec}s`;
-
-    if (gameState.timerSec <= 5) {
-      document.getElementById("hud-timer").classList.add("danger");
-      beep(440, 0.08, "triangle");
-    }
-
-    if (gameState.timerSec <= 0) {
-      clearInterval(gameState.timerInterval);
-      gameState.lives--;
-      sfxWrong();
-      updateHUD();
-      toast("MASA TAMAT!");
-
-      if (gameState.lives <= 0) {
-        showResultScreen(false);
-      } else {
-        gameState.roundIndex++;
-        const cat = CURRICULUM[gameState.currentCategoryKey];
-        if (gameState.roundIndex >= cat.questions.length) {
-          showResultScreen(true);
-        } else {
-          loadQuestion();
-        }
-      }
-    }
-  }, 1000);
-}
-
-function updateHUD() {
-  document.getElementById("hud-score").textContent = `⭐ SKOR: ${gameState.score}`;
-  document.getElementById("hud-lives").textContent = "❤️".repeat(Math.max(0, gameState.lives)) + "🖤".repeat(Math.max(0, 3 - gameState.lives));
-}
-
-function toast(msg) {
-  const t = document.getElementById("toast-box");
-  t.textContent = msg;
-  t.style.opacity = "1";
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => { t.style.opacity = "0"; }, 1200);
-}
-
-function showResultScreen(isWin) {
-  clearInterval(gameState.timerInterval);
-  clear3DMonsters();
-  document.getElementById("game-hud").style.display = "none";
-  document.getElementById("glove-cursor").style.display = "none";
-
-  const res = document.getElementById("res-screen");
-  res.style.display = "flex";
-
-  const title = document.getElementById("res-title");
-  const stars = document.getElementById("res-stars");
-  const msg = document.getElementById("res-msg");
-
-  if (isWin) {
-    title.textContent = "TAHNIAH, JUARA!";
-    title.style.color = "#fbd000";
-    stars.textContent = gameState.lives === 3 ? "⭐⭐⭐" : (gameState.lives === 2 ? "⭐⭐☆" : "⭐☆☆");
-    msg.textContent = `Hebat sekali, ${gameState.playerName}! Cikgu AVA sangat bangga. Skor terkumpul: ${gameState.score}!`;
-    sfxCorrect();
-    say(`Tahniah ${gameState.playerName}, Cikgu AVA bangga dengan kejayaan anda!`);
-  } else {
-    title.textContent = "CUBA LAGI!";
-    title.style.color = "#e52521";
-    stars.textContent = "💔💔💔";
-    msg.textContent = `Jangan putus asa, ${gameState.playerName}! Cikgu AVA sedia temani anda berlatih lagi!`;
-    sfxWrong();
-    say(`Jangan berputus asa ${gameState.playerName}, jom cuba lagi bersama Cikgu AVA!`);
-  }
-}
-
-function restartCurrentCategory() {
-  startGameDirectly();
-}
-
-function backToMenu() {
-  clearInterval(gameState.timerInterval);
-  clear3DMonsters();
-  document.getElementById("game-hud").style.display = "none";
-  document.getElementById("res-screen").style.display = "none";
-  document.getElementById("glove-cursor").style.display = "none";
-  document.getElementById("menu-screen").style.display = "flex";
-}
-
-// ===== 8. GELUNG ANIMASI THREE.JS =====
-const clock = new THREE.Clock();
-
-function animate() {
-  requestAnimationFrame(animate);
-  const delta = clock.getDelta();
-  const time = clock.getElapsedTime();
-
-  // Animasi Terbit / Ayunan Raksasa 3D
-  gameState.monsters3D.forEach((m, idx) => {
-    if (!m.userData.isKnocked) {
-      const isTargeted = (gameState.hoveredMonsterIndex === idx);
-      const targetScale = isTargeted ? 1.15 : 1.0;
-      m.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
-
-      m.position.y = m.userData.baseY + Math.sin(time * 2.2 + idx * 1.5) * 0.22;
-      m.rotation.y = Math.sin(time * 1.4 + idx) * 0.12;
-    } else {
-      // Kesan Jatuh Tumbuk KO
-      m.position.y -= delta * 12;
-      m.position.z -= delta * 8;
-      m.rotation.x += delta * 14;
-      m.rotation.z += delta * 12;
-    }
-  });
-
-  if (avaMesh3D) {
-    avaMesh3D.position.y = -3.2 + Math.sin(time * 2) * 0.12;
-  }
-
-  renderer.render(scene, camera);
-}
-animate();
-
-// Inisialisasi awal & aktifkan kamera
-document.getElementById("player-input").value = gameState.playerName;
-buildCategoryMenu();
-
-window.addEventListener("DOMContentLoaded", () => {
-  initHandsAndCamera();
-});
-</script>
-</body>
-</html>
+const sfxCorrect =
